@@ -170,7 +170,7 @@
             <Capability>1</Capability>
             <DriverSelection>4097</DriverSelection>
           </Flash1>
-          <bUseTDR>0</bUseTDR>
+          <bUseTDR>1</bUseTDR>
           <Flash2>BIN\lmidk-agdi.dll</Flash2>
           <Flash3>"" ()</Flash3>
           <Flash4></Flash4>
@@ -406,24 +406,24 @@
           <GroupName>Source</GroupName>
           <Files>
             <File>
+              <FileName>startup.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\startup.s</FilePath>
+            </File>
+            <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\main.c</FilePath>
             </File>
             <File>
-              <FileName>startup.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>.\startup.s</FilePath>
+              <FileName>portInitializations.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\portInitializations.c</FilePath>
             </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>Object code</GroupName>
-          <Files>
             <File>
-              <FileName>texas.o</FileName>
-              <FileType>3</FileType>
-              <FilePath>.\texas.o</FilePath>
+              <FileName>PWM.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\PWM.c</FilePath>
             </File>
           </Files>
         </Group>

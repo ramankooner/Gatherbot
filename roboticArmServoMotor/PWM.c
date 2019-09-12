@@ -9,9 +9,6 @@
 //                = 80 MHz/2 = 40 MHz (in this example)
 // Output on PB6/M0PWM0
 
-
-
-
 //********************************************
 //****************  PB6  *********************
 //***************  M0PWM0 ********************
@@ -108,11 +105,12 @@ void M0PWM3_Duty(uint16_t duty) {
 	PWM0_1_CMPB_R = duty - 1;
 }
 
-
+// CHANGE THIS ONE -- OUR LCD CONNECTS TO PA7
 //********************************************
 //****************  PA7  *********************
 //***************  M1PWM3 ********************
 //********************************************
+/*
 void M1PWM3_Init(uint16_t period, uint16_t duty) {
 	volatile unsigned long delay;
 	SYSCTL_RCGCPWM_R |= 0x02;             // Activate PWM1
@@ -141,3 +139,4 @@ void M1PWM3_Duty(uint16_t duty) {
 	PWM1_1_CMPB_R = duty - 1;
 }
 
+*/

@@ -3,3 +3,7 @@
 .\main.o: PWM.h
 .\main.o: C:\Keil_v5\ARM\ARMCC\bin\..\include\stdint.h
 .\main.o: portInitializations.h
+.\main.o: UART.h
+.\main.o: Nokia5110.h
+.\main.o: uartCommunication.h
+.\main.o: PLL.h

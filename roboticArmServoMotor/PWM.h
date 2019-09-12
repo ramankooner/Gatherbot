@@ -16,6 +16,6 @@ void M0PWM3_Init(uint16_t period, uint16_t duty);
 void M0PWM3_Duty(uint16_t duty);
 
 // PA7
-void M1PWM3_Init(uint16_t period, uint16_t duty);
-void M1PWM3_Duty(uint16_t duty);
+//void M1PWM3_Init(uint16_t period, uint16_t duty);
+//void M1PWM3_Duty(uint16_t duty);
 
