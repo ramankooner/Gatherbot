@@ -11,6 +11,7 @@
 
 // GPIO & Miscellaneous Functions
 void EnableInterrupts(void);
+void robotArmMotion(void);
 
 unsigned char n;
 int i;
@@ -74,7 +75,7 @@ int main(void){
 		Nokia5110_SetCursor(3,1);
 		Nokia5110_OutUDec(finalYCoordinateValue);
 		
-  	Nokia5110_SetCursor(3,2);
+		Nokia5110_SetCursor(3,2);
 		Nokia5110_OutChar(buffer[0]);
 		
 		Nokia5110_SetCursor(3,3);
@@ -83,5 +84,9 @@ int main(void){
 		Nokia5110_SetCursor(3,4);
 		Nokia5110_OutUDec(checkDisplay);
 	}
+}
+
+void robotArmMotion(void) {
+	
 }
 
