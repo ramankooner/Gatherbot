@@ -22,8 +22,9 @@ void M0PWM0_Init(uint16_t period, uint16_t duty){
   GPIO_PORTB_PCTL_R |= 0x04000000;
   GPIO_PORTB_AMSEL_R &= ~0x40;          // disable analog functionality on PB6
   GPIO_PORTB_DEN_R |= 0x40;             // enable digital I/O on PB6
-  SYSCTL_RCC_R = 0x00100000 |           // 3) use PWM divider
-      (SYSCTL_RCC_R & (~0x000E0000));   //    configure for /2 divider
+	SYSCTL_RCC_R |= SYSCTL_RCC_USEPWMDIV; // 3) use PWM divider
+  SYSCTL_RCC_R &= ~SYSCTL_RCC_PWMDIV_M; //    clear PWM divider field
+  SYSCTL_RCC_R += SYSCTL_RCC_PWMDIV_64;  //    configure for /64 divider       
   PWM0_0_CTL_R = 0;                     // 4) re-loading down-counting mode
   PWM0_0_GENA_R = 0xC8;                 // low on LOAD, high on CMPA down
   // PB6 goes low on LOAD
@@ -39,7 +40,7 @@ void M0PWM0_Duty(uint16_t duty){
   PWM0_0_CMPA_R = duty - 1;             // 6) count value when output rises
 }
 
-
+// NOT BEING USED
 //********************************************
 //****************  PB7  *********************
 //***************  M0PWM1 ********************
@@ -73,6 +74,37 @@ void M0PWM1_Duty(uint16_t duty){
 }
 
 
+
+// Using SysDiv64 -- CONNECTED TO PB7
+void M0PWM1_Init_new(uint16_t period, uint16_t duty){
+  volatile unsigned long delay;
+  SYSCTL_RCGCPWM_R |= 0x01;             // 1) activate PWM0
+  SYSCTL_RCGCGPIO_R |= 0x02;            // 2) activate port B
+  delay = SYSCTL_RCGCGPIO_R;            // allow time to finish activating
+  GPIO_PORTB_AFSEL_R |= 0x80;           // enable alt funct on PB7
+  GPIO_PORTB_PCTL_R &= ~0xF0000000;     // configure PB7 as M0PWM1
+  GPIO_PORTB_PCTL_R |= 0x40000000;
+  GPIO_PORTB_AMSEL_R &= ~0x80;          // disable analog functionality on PB7
+  GPIO_PORTB_DEN_R |= 0x80;             // enable digital I/O on PB7
+  SYSCTL_RCC_R |= SYSCTL_RCC_USEPWMDIV; // 3) use PWM divider
+  SYSCTL_RCC_R &= ~SYSCTL_RCC_PWMDIV_M; //    clear PWM divider field
+  SYSCTL_RCC_R += SYSCTL_RCC_PWMDIV_64;  //    configure for /64 divider
+  PWM0_0_CTL_R = 0;                     // 4) re-loading down-counting mode
+  PWM0_0_GENB_R = (PWM_0_GENB_ACTCMPBD_ONE|PWM_0_GENB_ACTLOAD_ZERO);
+  // PB7 goes low on LOAD
+  // PB7 goes high on CMPB down
+  PWM0_0_LOAD_R = period - 1;           // 5) cycles needed to count down to 0
+  PWM0_0_CMPB_R = duty - 1;             // 6) count value when output rises
+  PWM0_0_CTL_R |= 0x00000001;           // 7) start PWM0
+  PWM0_ENABLE_R |= 0x00000002;          // enable PB7/M0PWM1
+}
+// change duty cycle of PB7
+// duty is number of PWM clock cycles output is high  (2<=duty<=period-1)
+void M0PWM1_Duty_new(uint16_t duty){
+  PWM0_0_CMPB_R = duty - 1;             // 6) count value when output rises
+}
+
+
 //********************************************
 //****************  PB5  *********************
 //***************  M0PWM3 ********************
@@ -91,7 +123,9 @@ void M0PWM3_Init(uint16_t period, uint16_t duty) {
 	
 	SYSCTL_RCGCPWM_R |= 0x01;             // Active PWM0	
 	SYSCTL_RCGCGPIO_R |= 0x02;            // Clock for Port B
-	SYSCTL_RCC_R &= ~0x00100000;          
+	SYSCTL_RCC_R |= SYSCTL_RCC_USEPWMDIV; // 3) use PWM divider
+  SYSCTL_RCC_R &= ~SYSCTL_RCC_PWMDIV_M; //    clear PWM divider field
+  SYSCTL_RCC_R += SYSCTL_RCC_PWMDIV_64;  //    configure for /64 divider       
 	
 	PWM0_1_CTL_R = 0x00;                  // re-loading down
 	PWM0_1_GENB_R |= 0x00000C08;          // low on load
@@ -110,7 +144,7 @@ void M0PWM3_Duty(uint16_t duty) {
 //****************  PA7  *********************
 //***************  M1PWM3 ********************
 //********************************************
-/*
+
 void M1PWM3_Init(uint16_t period, uint16_t duty) {
 	volatile unsigned long delay;
 	SYSCTL_RCGCPWM_R |= 0x02;             // Activate PWM1
@@ -125,7 +159,9 @@ void M1PWM3_Init(uint16_t period, uint16_t duty) {
 	
 	SYSCTL_RCGCPWM_R |= 0x02;             // Active PWM1	
 	SYSCTL_RCGCGPIO_R |= 0x01;            // Clock for Port A
-	SYSCTL_RCC_R &= ~0x00100000;          
+	SYSCTL_RCC_R |= SYSCTL_RCC_USEPWMDIV; // 3) use PWM divider
+  SYSCTL_RCC_R &= ~SYSCTL_RCC_PWMDIV_M; //    clear PWM divider field
+  SYSCTL_RCC_R += SYSCTL_RCC_PWMDIV_64;  //    configure for /64 divider      
 	
 	PWM1_1_CTL_R = 0x00;                  // re-loading down
 	PWM1_1_GENB_R |= 0x00000C08;          // low on load
@@ -139,4 +175,3 @@ void M1PWM3_Duty(uint16_t duty) {
 	PWM1_1_CMPB_R = duty - 1;
 }
 
-*/

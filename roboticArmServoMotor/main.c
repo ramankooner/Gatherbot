@@ -1,5 +1,7 @@
 // Servo Motor - Robotic Arm: Created 7/21/2019
 // Added UART Communication Protocol - 9/12/2019
+// Added Robotic Arm Movement - 9/29/2019
+
 
 #include "tm4c123gh6pm.h"
 #include "PWM.h"
@@ -12,6 +14,13 @@
 // GPIO & Miscellaneous Functions
 void EnableInterrupts(void);
 void robotArmMotion(void);
+void Delay(void); 
+void Delay2(void);
+
+// Robot Arm Functions
+void resetArm(void);
+void dropArm(void);
+void pickUp(void);
 
 unsigned char n;
 int i;
@@ -26,19 +35,29 @@ int main(void){
 	PLL_Init();
 	UART_Init();
 	PortF_Init(); //On-board LEDs
-	
-	Nokia5110_Init();
-	Nokia5110_Clear();
-	
 	GPIO_PORTF_DATA_R = 0x00;
 	
-	//M0PWM3_Init(40000, 35000); //PB5   SECOND JOINT
-	//M0PWM3_Init(40000, 35500); // PB5 HAND - 35500 CLOSE/30000 OPEN 
-	//M1PWM3_Init(40000, 20000); //PA7    THIRD JOINT - 20,000 TO GO FORWARD
-	//M0PWM3_Init(40000, 21000);   // SECOND JOINT - 7000 TO ORIGINAL POSITION/ 20,000 - 23,000 FOR GOING FORWARD
 	
+	
+	// Initialize Arm
+	M0PWM3_Init(15625, 720); //PB5 - To Center
+	Delay2();
+	M0PWM0_Init(15625, 400); 
+	Delay2();
+	M0PWM1_Init_new(15625, 1800); //PB7 - Reset Height	
+	
+	// EXECUTE ROBOTIC ARM MOVEMENT
+	pickUp();
+	resetArm();
+	dropArm();
+	resetArm();
+
+	GPIO_PORTF_DATA_R = 0x08;
+		
 	while(1) {
 		
+		// UART COMMUNICATION
+		/*
 		for ( i = 0; i < sizeof(buffer); i++) {
 			n = UART_InChar();
 			
@@ -82,11 +101,84 @@ int main(void){
 		Nokia5110_OutChar(buffer[1]);
 		
 		Nokia5110_SetCursor(3,4);
-		Nokia5110_OutUDec(checkDisplay);
+		Nokia5110_OutUDec(checkDisplay);*/
 	}
 }
 
-void robotArmMotion(void) {
+void resetArm(void){
+	Delay2();
+	M0PWM3_Duty(720); //PB5 - To Center
+	Delay2();
+	Delay2();
+	M0PWM0_Duty(400); 
+	Delay2();
+	Delay2();
+	M0PWM1_Duty_new(1800); //PB7 - Reset Height
+}
+
+void dropArm(void){
+	Delay2();
+	M0PWM1_Duty_new(1800); //PB7 - Reset Height
+	Delay2();
+	M0PWM3_Duty(255); //PB5 - To Drop Off
+	Delay2();
+	Delay2();
+	Delay2();
+	M1PWM3_Duty(320);  //Hand drops ball
+}
+
+void pickUp(void){
+	Delay2();
+	M0PWM3_Duty(700); //Center
+	Delay2();
+	M1PWM3_Duty(320); //Open hand
+	Delay2();
+	M0PWM0_Duty(400); //Reset Joint 2 PB6
+	Delay2();
+	M0PWM1_Duty_new(1800); // Reset Joint 3 PB7
+	Delay2();
+	M0PWM0_Duty(850); // Joint 2 Stage 1
+	Delay2();
+	M0PWM1_Duty_new(1500); // Joint 3 Stage 1
+	Delay2();
+	M0PWM0_Duty(1050);
+	Delay2();
+	M0PWM1_Duty_new(1150); // Joint 3 Stage 2
+	Delay2();
+	Delay2();
+	M0PWM0_Duty(1250);
+	Delay2();
+	Delay2();
+	M0PWM0_Duty(1375);
+	Delay2();
+	Delay2();
+	M0PWM0_Duty(1450);
+	Delay2();
+	Delay2();
+	M0PWM0_Duty(1500); // Joint 2 Stage 2
+	Delay2();
+	Delay2();
+	Delay2();
+	M1PWM3_Init(15625, 550); //Grab 
+	Delay2();
+	M0PWM0_Duty(850);
+	Delay2();
+	M0PWM1_Duty_new(1500);
+	Delay2();
+	M0PWM0_Duty(400);
 	
 }
 
+void Delay(void){ unsigned long volatile time;
+  time = 727240*20/91;  // 0.01sec
+  while(time){
+		time--;
+  }
+}
+
+void Delay2(void) {
+	int i;
+	for(i=0; i < 30; i++) {
+		Delay();
+	}
+}

@@ -1,0 +1,82 @@
+	// PROJECT COMMENTS
+	
+	NOTES:
+	
+	PA7 - PA7 is being used as a port for the LCD and a PWM. Change the PWM signal from PA7 to ____
+	
+	- Need to add two more PWM signals for the motor
+	- Add more PWM Duty cycles for a smoother motion using a single function 
+	
+--------------------------------------------------------------------------------------------------------------------------------------------------------------	
+	
+	COMMENTS FROM 9/29/2019
+	
+	ROBOTIC MOVEMENT COMMENTS 
+	
+	/* WORKS
+	M1PWM3_Init(15625, 320);
+	Delay2();
+	resetArm();
+	Delay2();
+	M1PWM3_Duty(550); //Grab
+	Delay2();
+	dropArm(); // Go to drop off position and drop ball
+	GPIO_PORTF_DATA_R = 0x08;
+	*/
+	
+	
+	//M0PWM3_Init(40000, 35000); //PB5   SECOND JOINT
+	//M0PWM3_Init(40000, 35500); // PB5 HAND - 35500 CLOSE/30000 OPEN 
+	//M1PWM3_Init(40000, 20000); //PA7    THIRD JOINT - 20,000 TO GO FORWARD
+	//M0PWM3_Init(40000, 21000);   // SECOND JOINT - 7000 TO ORIGINAL POSITION/ 20,000 - 23,000 FOR GOING FORWARD
+	
+	// Drop State
+	//M0PWM1_Init(500000, 35000); //Rotation Joint: Unexpected Value: 8000 for drop off , 20000 for center
+	//M0PWM0_Init(500000, 8000); //Joint 3 - Default Height (Good for rotating to drop off) 35000
+	
+	
+	// Reset State (Neutral Forward)
+	//M0PWM1_Init(500000, 35000);
+	//M0PWM0_Init(500000, 20000);
+	
+	// Pick Up State
+	//M1PWM3_Init(500000, 39000); HAND - 17500 to grab ball / 10000 to Open
+	//M0PWM1_Init(500000, 10000); 
+	
+	// Grabbing (Stage 1)
+	//M0PWM1_Init(500000, 20000); //Joint 2 (32
+	//M0PWM0_Init(500000, 14000); //Joint 3 (14
+	
+	// Stage 2
+	//M0PWM1_Duty(33750); //Joint 2 (33
+	
+	// Execute Grab
+	//M0PWM3_Init(500000, 17500);
+	
+	//CHECK SYSDIV64
+	//HAND - PA7 (Open 320, Full Close 780, Grab 520)/ Joint 3 - PB7 (Reset - 1850) Range: 400 - 2000 / Joint 2 - PB6 / Joint 1 - PB5
+	//M1PWM3_Init(15625, 320); //HAND GRAB ON PA7
+	//M0PWM1_Init_new(15625, 250); //JOINT 3 FULLY EXTENDED ON PB7
+	//M0PWM0_Init(15625, ); 
+	//M1PWM3_Init(15625, 550); //Grab
+	//Delay2();
+	//M0PWM1_Init_new(15625, 1850); 
+	//Delay2();
+	//Delay2();
+	//M0PWM3_Init(15625, 255); //PB5 - To Drop Poi nt
+	//Delay2();
+	//M1PWM3_Init(15625, 320); // Drop
+	//GPIO_PORTF_DATA_R = 0x04;
+
+
+
+	//Reset State SySDiv64 - MAX: 1500 MIN: 250
+	//M0PWM1_Init_new(15625, 1100);
+	
+	
+	//Drop State
+	//M0PWM1_Init_new(15625, 1100); // Joint 3 -
+	//M0PWM0_Init(15625, 250); // Joint 1 - Max: 1500 Min: 250
+	
+	
+--------------------------------------------------------------------------------------------------------------------------------------------------------------	
