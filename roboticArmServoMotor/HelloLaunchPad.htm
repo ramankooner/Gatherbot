@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\HelloLaunchPad.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\HelloLaunchPad.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5.03 [Build 76]: Last Updated: Tue Oct 01 18:07:47 2019
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5.03 [Build 76]: Last Updated: Tue Oct 01 18:18:45 2019
 <BR><P>
 <H3>Maximum Stack Usage =         20 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -760,21 +760,21 @@ Global Symbols
 
 <P><STRONG><a name="[d0]"></a>__semihosting_library_function</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, indicate_semi.o(.text), UNUSED)
 
-<P><STRONG><a name="[94]"></a>Delay</STRONG> (Thumb, 22 bytes, Stack size 8 bytes, main.o(i.Delay))
+<P><STRONG><a name="[94]"></a>Delay</STRONG> (Thumb, 22 bytes, Stack size 8 bytes, delayfunctions.o(i.Delay))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = Delay
 </UL>
 <BR>[Called By]<UL><LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Delay2
 </UL>
 
-<P><STRONG><a name="[93]"></a>Delay2</STRONG> (Thumb, 18 bytes, Stack size 4 bytes, main.o(i.Delay2))
+<P><STRONG><a name="[93]"></a>Delay2</STRONG> (Thumb, 18 bytes, Stack size 4 bytes, delayfunctions.o(i.Delay2))
 <BR><BR>[Stack]<UL><LI>Max Depth = 12<LI>Call Chain = Delay2 &rArr; Delay
 </UL>
 <BR>[Calls]<UL><LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Delay
 </UL>
 <BR>[Called By]<UL><LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;resetArm
 <LI><a href="#[9f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pickUp
-<LI><a href="#[8a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 <LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dropArm
+<LI><a href="#[8a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
 <P><STRONG><a name="[a1]"></a>M0PWM0_Duty</STRONG> (Thumb, 8 bytes, Stack size 0 bytes, pwm.o(i.M0PWM0_Duty))
@@ -835,7 +835,7 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[8a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[95]"></a>dropArm</STRONG> (Thumb, 46 bytes, Stack size 8 bytes, main.o(i.dropArm))
+<P><STRONG><a name="[95]"></a>dropArm</STRONG> (Thumb, 46 bytes, Stack size 8 bytes, robotarmmovement.o(i.dropArm))
 <BR><BR>[Stack]<UL><LI>Max Depth = 20<LI>Call Chain = dropArm &rArr; Delay2 &rArr; Delay
 </UL>
 <BR>[Calls]<UL><LI><a href="#[98]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;M1PWM3_Duty
@@ -849,21 +849,21 @@ Global Symbols
 <P><STRONG><a name="[8a]"></a>main</STRONG> (Thumb, 90 bytes, Stack size 0 bytes, main.o(i.main))
 <BR><BR>[Stack]<UL><LI>Max Depth = 20<LI>Call Chain = main &rArr; resetArm &rArr; Delay2 &rArr; Delay
 </UL>
-<BR>[Calls]<UL><LI><a href="#[9a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_Init
+<BR>[Calls]<UL><LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;resetArm
+<LI><a href="#[9f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pickUp
+<LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dropArm
+<LI><a href="#[9a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_Init
 <LI><a href="#[9b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PortF_Init
 <LI><a href="#[99]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PLL_Init
 <LI><a href="#[9c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;M0PWM3_Init
 <LI><a href="#[9e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;M0PWM1_Init_new
 <LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;M0PWM0_Init
-<LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;resetArm
-<LI><a href="#[9f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pickUp
-<LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dropArm
 <LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Delay2
 </UL>
 <BR>[Called By]<UL><LI><a href="#[89]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__rt_entry_main
 </UL>
 
-<P><STRONG><a name="[9f]"></a>pickUp</STRONG> (Thumb, 224 bytes, Stack size 8 bytes, main.o(i.pickUp))
+<P><STRONG><a name="[9f]"></a>pickUp</STRONG> (Thumb, 224 bytes, Stack size 8 bytes, robotarmmovement.o(i.pickUp))
 <BR><BR>[Stack]<UL><LI>Max Depth = 20<LI>Call Chain = pickUp &rArr; Delay2 &rArr; Delay
 </UL>
 <BR>[Calls]<UL><LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;M1PWM3_Init
@@ -876,7 +876,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[8a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[a0]"></a>resetArm</STRONG> (Thumb, 48 bytes, Stack size 8 bytes, main.o(i.resetArm))
+<P><STRONG><a name="[a0]"></a>resetArm</STRONG> (Thumb, 48 bytes, Stack size 8 bytes, robotarmmovement.o(i.resetArm))
 <BR><BR>[Stack]<UL><LI>Max Depth = 20<LI>Call Chain = resetArm &rArr; Delay2 &rArr; Delay
 </UL>
 <BR>[Calls]<UL><LI><a href="#[97]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;M0PWM3_Duty

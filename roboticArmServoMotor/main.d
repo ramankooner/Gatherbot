@@ -7,3 +7,5 @@
 .\main.o: Nokia5110.h
 .\main.o: uartCommunication.h
 .\main.o: PLL.h
+.\main.o: robotArmMovement.h
+.\main.o: delayFunctions.h
