@@ -15,3 +15,10 @@ void Delay2(void) {
 		Delay();
 	}
 }
+
+void Delay3(void) {
+	int i;
+	for(i=0; i < 2; i++) {
+		Delay();
+	}
+}
