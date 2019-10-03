@@ -112,7 +112,7 @@ void M0PWM1_Duty_new(uint16_t duty){
 //********************************************
 void M0PWM2_Init(uint16_t period, uint16_t duty) {
 	volatile unsigned long delay;
-	SYSCTL_RCGCPWM_R |= 0x02;             // Activate PWM0
+	SYSCTL_RCGCPWM_R |= 0x01;             // Activate PWM0
 	SYSCTL_RCGCGPIO_R |= 0x02;            // Activate port B
 	delay = SYSCTL_RCGCGPIO_R;
 	GPIO_PORTB_AFSEL_R |= 0x10;           // Alt funct on PB4
@@ -147,7 +147,7 @@ void M0PWM2_Duty(uint16_t duty) {
 //********************************************
 void M0PWM3_Init(uint16_t period, uint16_t duty) {
 	volatile unsigned long delay;
-	SYSCTL_RCGCPWM_R |= 0x02;             // Activate PWM0
+	SYSCTL_RCGCPWM_R |= 0x01;             // Activate PWM0
 	SYSCTL_RCGCGPIO_R |= 0x02;            // Activate port B
 	delay = SYSCTL_RCGCGPIO_R;
 	GPIO_PORTB_AFSEL_R |= 0x20;           // Alt funct on PB5
@@ -175,6 +175,75 @@ void M0PWM3_Duty(uint16_t duty) {
 	PWM0_1_CMPB_R = duty - 1;
 }
 
+
+//********************************************
+//****************  PD0  *********************
+//***************  M0PWM6 ********************
+//********************************************
+void M0PWM6_Init(uint16_t period, uint16_t duty) {
+	volatile unsigned long delay;
+	SYSCTL_RCGCPWM_R |= 0x01;             // Activate PWM0
+	SYSCTL_RCGCGPIO_R |= 0x08;            // Activate port D
+	delay = SYSCTL_RCGCGPIO_R;
+	GPIO_PORTD_AFSEL_R |= 0x01;           // Alt funct on PD0
+	GPIO_PORTD_PCTL_R &= 0xFFFFFFF0;      // configure PD0 as M0PWM6
+	GPIO_PORTD_PCTL_R |= 0x00000004;
+	GPIO_PORTD_DIR_R |= 0x01;             // Set PD0 output
+	GPIO_PORTD_AMSEL_R &= ~0x01;          // disable analong funct on PD0
+	GPIO_PORTD_DEN_R |= 0x01;             // enable digital I/O on PD0
+	
+	SYSCTL_RCGCPWM_R |= 0x01;             // Active PWM0	
+	SYSCTL_RCGCGPIO_R |= 0x08;            // Clock for Port D
+	SYSCTL_RCC_R |= SYSCTL_RCC_USEPWMDIV; // 3) use PWM divider
+  SYSCTL_RCC_R &= ~SYSCTL_RCC_PWMDIV_M; //    clear PWM divider field
+  SYSCTL_RCC_R += SYSCTL_RCC_PWMDIV_64;  //    configure for /64 divider       
+	
+	PWM0_3_CTL_R = 0x00;                  // re-loading down
+	PWM0_3_GENA_R |= 0x00000C08;          // low on load
+	PWM0_3_LOAD_R = period - 1;           // cycles needed to count to 0
+	PWM0_3_CMPA_R = duty;                 // count value when output rises
+	PWM0_3_CTL_R |= 0x00000001;           // start PWM0
+	PWM0_ENABLE_R |= 0x40;                // enable M0PWM6
+}
+
+void M0PWM6_Duty(uint16_t duty) {
+	PWM0_3_CMPA_R = duty - 1;
+}
+
+
+//********************************************
+//****************  PD1  *********************
+//***************  M0PWM7 ********************
+//********************************************
+void M0PWM7_Init(uint16_t period, uint16_t duty) {
+	volatile unsigned long delay;
+	SYSCTL_RCGCPWM_R |= 0x01;             // Activate PWM0
+	SYSCTL_RCGCGPIO_R |= 0x08;            // Activate port D
+	delay = SYSCTL_RCGCGPIO_R;
+	GPIO_PORTD_AFSEL_R |= 0x02;           // Alt funct on PD1
+	GPIO_PORTD_PCTL_R &= 0xFFFFFF0F;      // configure PD1 as M0PWM7
+	GPIO_PORTD_PCTL_R |= 0x00000040;
+	GPIO_PORTD_DIR_R |= 0x02;             // Set PD1 output
+	GPIO_PORTD_AMSEL_R &= ~0x02;          // disable analong funct on PD1
+	GPIO_PORTD_DEN_R |= 0x02;             // enable digital I/O on PD1
+	
+	SYSCTL_RCGCPWM_R |= 0x01;             // Active PWM0	
+	SYSCTL_RCGCGPIO_R |= 0x08;            // Clock for Port D
+	SYSCTL_RCC_R |= SYSCTL_RCC_USEPWMDIV; // 3) use PWM divider
+  SYSCTL_RCC_R &= ~SYSCTL_RCC_PWMDIV_M; //    clear PWM divider field
+  SYSCTL_RCC_R += SYSCTL_RCC_PWMDIV_64;  //    configure for /64 divider       
+	
+	PWM0_3_CTL_R = 0x00;                  // re-loading down
+	PWM0_3_GENB_R |= 0x00000C08;          // low on load
+	PWM0_3_LOAD_R = period - 1;           // cycles needed to count to 0
+	PWM0_3_CMPB_R = duty;                 // count value when output rises
+	PWM0_3_CTL_R |= 0x00000001;           // start PWM0
+	PWM0_ENABLE_R |= 0x80;                // enable M0PWM7
+}
+
+void M0PWM7_Duty(uint16_t duty) {
+	PWM0_3_CMPB_R = duty - 1;
+}
 
 
 // CHANGE THIS ONE -- OUR LCD CONNECTS TO PA7
