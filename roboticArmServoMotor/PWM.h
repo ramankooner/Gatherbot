@@ -15,6 +15,10 @@ void M0PWM1_Duty(uint16_t duty);
 void M0PWM1_Init_new(uint16_t period, uint16_t duty);
 void M0PWM1_Duty_new(uint16_t duty);
 
+// PB4
+void M0PWM2_Init(uint16_t period, uint16_t duty);
+void M0PWM2_Duty(uint16_t duty);
+
 // PB5
 void M0PWM3_Init(uint16_t period, uint16_t duty);
 void M0PWM3_Duty(uint16_t duty);
