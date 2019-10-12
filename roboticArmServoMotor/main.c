@@ -28,9 +28,10 @@ int main(void){
 	PLL_Init();
 	UART_Init();
 	PortF_Init(); //On-board LEDs
+	PortB_Init();
 	GPIO_PORTF_DATA_R = 0x00;
 	
-
+	/*
 	// Initialize Arm
 	M0PWM3_Init(15625, 720); //PB5 - To Center
 	Delay2();
@@ -38,14 +39,20 @@ int main(void){
 	Delay2();
 	M0PWM1_Init_new(15625, 1800); //PB7 - Reset Height	
 	
-	// TEST ROBOTIC ARM INTERPOLATION FUNCTIONS
-	//increasePWM(850, 1500, M0PWM3_Duty);
-	
 	// EXECUTE ROBOTIC ARM MOVEMENT
 	pickUp();
 	resetArm();
 	dropArm();
 	resetArm();
+	*/
+	
+	// PB6
+  M0PWM0_Init(15625, 14000);
+
+	// PB7 NEW
+	M0PWM1_Init_new(15625, 14000);
+	
+	GPIO_PORTB_DATA_R = 0x05;
 	
 	GPIO_PORTF_DATA_R = 0x08;
 		

@@ -14,3 +14,17 @@ void PortF_Init(void){
   GPIO_PORTF_AFSEL_R = 0x00;        // 6) no alternate function    
   GPIO_PORTF_DEN_R = 0x0E;          // 7) enable digital pins PF4-PF0        
 }
+
+// GPIO Port B Initializations
+void PortB_Init(void){ 
+	volatile unsigned long delay;
+  SYSCTL_RCGC2_R |= 0x00000002;     // 1) B clock
+  delay = SYSCTL_RCGC2_R;           // delay   
+  GPIO_PORTB_CR_R |= 0xCF;           // allow changes to PB3-0    
+  GPIO_PORTB_AMSEL_R &= ~0xCF;        // 3) disable analog function
+  GPIO_PORTB_PCTL_R &= ~0xFF000000;   // 4) GPIO clear bit PCTL  
+  GPIO_PORTB_PCTL_R |= 0x44000000; 
+	GPIO_PORTB_DIR_R |= 0x0F;          // 5) PB3-0 Output
+  GPIO_PORTB_AFSEL_R |= 0xC0;        // 6) no alternate function    
+  GPIO_PORTB_DEN_R |= 0xCF;          // 7) enable digital pins PB3-0       
+}

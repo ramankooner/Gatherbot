@@ -430,6 +430,36 @@
               <FileType>1</FileType>
               <FilePath>.\UART.c</FilePath>
             </File>
+            <File>
+              <FileName>Nokia5110.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Nokia5110.c</FilePath>
+            </File>
+            <File>
+              <FileName>uartCommunication.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\uartCommunication.c</FilePath>
+            </File>
+            <File>
+              <FileName>PLL.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\PLL.c</FilePath>
+            </File>
+            <File>
+              <FileName>projectComments.txt</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\projectComments.txt</FilePath>
+            </File>
+            <File>
+              <FileName>robotArmMovement.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\robotArmMovement.c</FilePath>
+            </File>
+            <File>
+              <FileName>delayFunctions.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\delayFunctions.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
