@@ -180,16 +180,17 @@
       <GroupNumber>1</GroupNumber>
       <FileNumber>2</FileNumber>
       <FileType>1</FileType>
-      <tvExp>0</tvExp>
+      <tvExp>1</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>22</ColumnNumber>
+      <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
 <<<<<<< HEAD
-      <TopLine>47</TopLine>
+      <TopLine>19</TopLine>
+      <CurrentLine>9</CurrentLine>
 =======
       <TopLine>1</TopLine>
+      <CurrentLine>23</CurrentLine>
 >>>>>>> 598960a4a591ddda49ecedadbbea80e80d67957c
-      <CurrentLine>9</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\main.c</PathWithFileName>
       <FilenameWithoutPath>main.c</FilenameWithoutPath>
@@ -218,10 +219,15 @@
       <FileType>1</FileType>
       <tvExp>1</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>13</ColumnNumber>
+      <ColumnNumber>14</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>178</TopLine>
+<<<<<<< HEAD
+      <TopLine>186</TopLine>
       <CurrentLine>210</CurrentLine>
+=======
+      <TopLine>1</TopLine>
+      <CurrentLine>1</CurrentLine>
+>>>>>>> 598960a4a591ddda49ecedadbbea80e80d67957c
       <bDave2>0</bDave2>
       <PathWithFileName>.\PWM.c</PathWithFileName>
       <FilenameWithoutPath>PWM.c</FilenameWithoutPath>
@@ -268,11 +274,7 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-<<<<<<< HEAD
       <TopLine>31</TopLine>
-=======
-      <TopLine>1</TopLine>
->>>>>>> 598960a4a591ddda49ecedadbbea80e80d67957c
       <CurrentLine>1</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\uartCommunication.c</PathWithFileName>
@@ -320,13 +322,8 @@
       <Focus>0</Focus>
       <ColumnNumber>11</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-<<<<<<< HEAD
-      <TopLine>64</TopLine>
-      <CurrentLine>53</CurrentLine>
-=======
       <TopLine>37</TopLine>
-      <CurrentLine>150</CurrentLine>
->>>>>>> 598960a4a591ddda49ecedadbbea80e80d67957c
+      <CurrentLine>53</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\robotArmMovement.c</PathWithFileName>
       <FilenameWithoutPath>robotArmMovement.c</FilenameWithoutPath>
