@@ -28,10 +28,13 @@ int main(void){
 	PLL_Init();
 	UART_Init();
 	PortF_Init(); //On-board LEDs
-	PortB_Init();
+	PortB_Init(); // Motor Direction Control 
+	PortD_Init();
 	GPIO_PORTF_DATA_R = 0x00;
 	
 	/*
+	// ARM MOVEMENT
+	
 	// Initialize Arm
 	M0PWM3_Init(15625, 720); //PB5 - To Center
 	Delay2();
@@ -45,15 +48,35 @@ int main(void){
 	dropArm();
 	resetArm();
 	*/
+		
+	// NOTE - CHANGE THIS TO WORK WITH PD0 AND PD1
+	//      - CHANGE DIRECTION CONTROL TO PD2,PD3,PD4,PD5
+	
+	// PD0
+	//M0PWM6_Init(15625, 14000);
+	
+	// PD1
+	//M0PWM7_Init(15625, 14000);
+	
+	// PORT D
+	// PD2-PD5
+	// 0x14 - Forward
+	// 0x28 - Backwards
+	// GPIO_PORTD_DATA_R = 0x14;
 	
 	// PB6
   M0PWM0_Init(15625, 14000);
 
-	// PB7 NEW
+	// PB7 
 	M0PWM1_Init_new(15625, 14000);
-	
+
+	// Control the Direction of the Motors
+	// 0x05 - Forward
+	// 0x0A - Backwards
 	GPIO_PORTB_DATA_R = 0x05;
 	
+	
+	// GREEN COLOR FOR POWER CHECK
 	GPIO_PORTF_DATA_R = 0x08;
 		
 	while(1) {

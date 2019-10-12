@@ -1,38 +1,38 @@
 Dependencies for Project 'roboticArmServoMotor', Target 'HelloLaunchPad': (DO NOT MODIFY !)
-F (.\startup.s)(0x5D966862)(--cpu Cortex-M4 --pd "__EVAL SETA 1" -g --apcs=interwork -I C:\Keil_v5\ARM\RV31\INC-I C:\Keil_v5\ARM\CMSIS\Include-I C:\Keil_v5\ARM\Inc\Luminary--list .\startup.lst --xref -o .\startup.o --depend .\startup.d)
-F (.\main.c)(0x5DA11BD4)(-c --cpu Cortex-M4 -D__EVAL -g -O0 --apcs=interwork --split_sections --signed_chars -I.. -I..\..\..-I C:\Keil_v5\ARM\RV31\INC-I C:\Keil_v5\ARM\CMSIS\Include-I C:\Keil_v5\ARM\Inc\Luminary-Drvmdk -DPART_LM4F120H5QR-o .\main.o --omf_browse .\main.crf --depend .\main.d)
-I (tm4c123gh6pm.h)(0x5D966862)
-I (PWM.h)(0x5D966862)
-I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x51C8A654)
-I (portInitializations.h)(0x5DA1159B)
-I (UART.h)(0x5D966862)
-I (Nokia5110.h)(0x5D966862)
-I (uartCommunication.h)(0x5D966862)
-I (PLL.h)(0x5D966862)
-I (robotArmMovement.h)(0x5D966862)
-I (delayFunctions.h)(0x5D966862)
-F (.\portInitializations.c)(0x5DA11ABA)(-c --cpu Cortex-M4 -D__EVAL -g -O0 --apcs=interwork --split_sections --signed_chars -I.. -I..\..\..-I C:\Keil_v5\ARM\RV31\INC-I C:\Keil_v5\ARM\CMSIS\Include-I C:\Keil_v5\ARM\Inc\Luminary-Drvmdk -DPART_LM4F120H5QR-o .\portinitializations.o --omf_browse .\portinitializations.crf --depend .\portinitializations.d)
-I (tm4c123gh6pm.h)(0x5D966862)
-F (.\PWM.c)(0x5D966862)(-c --cpu Cortex-M4 -D__EVAL -g -O0 --apcs=interwork --split_sections --signed_chars -I.. -I..\..\..-I C:\Keil_v5\ARM\RV31\INC-I C:\Keil_v5\ARM\CMSIS\Include-I C:\Keil_v5\ARM\Inc\Luminary-Drvmdk -DPART_LM4F120H5QR-o .\pwm.o --omf_browse .\pwm.crf --depend .\pwm.d)
-I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x51C8A654)
-I (tm4c123gh6pm.h)(0x5D966862)
-F (.\UART.c)(0x5D966862)(-c --cpu Cortex-M4 -D__EVAL -g -O0 --apcs=interwork --split_sections --signed_chars -I.. -I..\..\..-I C:\Keil_v5\ARM\RV31\INC-I C:\Keil_v5\ARM\CMSIS\Include-I C:\Keil_v5\ARM\Inc\Luminary-Drvmdk -DPART_LM4F120H5QR-o .\uart.o --omf_browse .\uart.crf --depend .\uart.d)
-I (UART.h)(0x5D966862)
-I (tm4c123gh6pm.h)(0x5D966862)
-F (.\Nokia5110.c)(0x5D966862)(-c --cpu Cortex-M4 -D__EVAL -g -O0 --apcs=interwork --split_sections --signed_chars -I.. -I..\..\..-I C:\Keil_v5\ARM\RV31\INC-I C:\Keil_v5\ARM\CMSIS\Include-I C:\Keil_v5\ARM\Inc\Luminary-Drvmdk -DPART_LM4F120H5QR-o .\nokia5110.o --omf_browse .\nokia5110.crf --depend .\nokia5110.d)
-I (Nokia5110.h)(0x5D966862)
-F (.\uartCommunication.c)(0x5D966862)(-c --cpu Cortex-M4 -D__EVAL -g -O0 --apcs=interwork --split_sections --signed_chars -I.. -I..\..\..-I C:\Keil_v5\ARM\RV31\INC-I C:\Keil_v5\ARM\CMSIS\Include-I C:\Keil_v5\ARM\Inc\Luminary-Drvmdk -DPART_LM4F120H5QR-o .\uartcommunication.o --omf_browse .\uartcommunication.crf --depend .\uartcommunication.d)
-I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x51C8A654)
-I (C:\Keil_v5\ARM\ARMCC\include\stdlib.h)(0x51C8A654)
-I (C:\Keil_v5\ARM\ARMCC\include\math.h)(0x51C8A654)
-I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x51C8A654)
-F (.\PLL.c)(0x5D966862)(-c --cpu Cortex-M4 -D__EVAL -g -O0 --apcs=interwork --split_sections --signed_chars -I.. -I..\..\..-I C:\Keil_v5\ARM\RV31\INC-I C:\Keil_v5\ARM\CMSIS\Include-I C:\Keil_v5\ARM\Inc\Luminary-Drvmdk -DPART_LM4F120H5QR-o .\pll.o --omf_browse .\pll.crf --depend .\pll.d)
-I (PLL.h)(0x5D966862)
-F (.\projectComments.txt)(0x5D966862)()
-F (.\robotArmMovement.c)(0x5D966862)(-c --cpu Cortex-M4 -D__EVAL -g -O0 --apcs=interwork --split_sections --signed_chars -I.. -I..\..\..-I C:\Keil_v5\ARM\RV31\INC-I C:\Keil_v5\ARM\CMSIS\Include-I C:\Keil_v5\ARM\Inc\Luminary-Drvmdk -DPART_LM4F120H5QR-o .\robotarmmovement.o --omf_browse .\robotarmmovement.crf --depend .\robotarmmovement.d)
-I (delayFunctions.h)(0x5D966862)
-I (PWM.h)(0x5D966862)
-I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x51C8A654)
-I (tm4c123gh6pm.h)(0x5D966862)
-F (.\delayFunctions.c)(0x5D966862)(-c --cpu Cortex-M4 -D__EVAL -g -O0 --apcs=interwork --split_sections --signed_chars -I.. -I..\..\..-I C:\Keil_v5\ARM\RV31\INC-I C:\Keil_v5\ARM\CMSIS\Include-I C:\Keil_v5\ARM\Inc\Luminary-Drvmdk -DPART_LM4F120H5QR-o .\delayfunctions.o --omf_browse .\delayfunctions.crf --depend .\delayfunctions.d)
-I (delayFunctions.h)(0x5D966862)
+F (.\startup.s)(0x5D93F682)(--cpu Cortex-M4 --pd "__EVAL SETA 1" -g --apcs=interwork -I C:\Keil\ARM\RV31\INC-I C:\Keil\ARM\CMSIS\Include-I C:\Keil\ARM\Inc\Luminary--list .\startup.lst --xref -o .\startup.o --depend .\startup.d)
+F (.\main.c)(0x5DA13ADA)(-c --cpu Cortex-M4 -D__EVAL -g -O0 --apcs=interwork --split_sections --signed_chars -I.. -I..\..\..-I C:\Keil\ARM\RV31\INC-I C:\Keil\ARM\CMSIS\Include-I C:\Keil\ARM\Inc\Luminary-Drvmdk -DPART_LM4F120H5QR-o .\main.o --omf_browse .\main.crf --depend .\main.d)
+I (tm4c123gh6pm.h)(0x5D93F682)
+I (PWM.h)(0x5D9555CB)
+I (C:\Keil\ARM\ARMCC\include\stdint.h)(0x51C89844)
+I (portInitializations.h)(0x5DA13A26)
+I (UART.h)(0x5D93F682)
+I (Nokia5110.h)(0x5D93F682)
+I (uartCommunication.h)(0x5D93FA4F)
+I (PLL.h)(0x5D93F88C)
+I (robotArmMovement.h)(0x5D940703)
+I (delayFunctions.h)(0x5D9406F3)
+F (.\portInitializations.c)(0x5DA13B7B)(-c --cpu Cortex-M4 -D__EVAL -g -O0 --apcs=interwork --split_sections --signed_chars -I.. -I..\..\..-I C:\Keil\ARM\RV31\INC-I C:\Keil\ARM\CMSIS\Include-I C:\Keil\ARM\Inc\Luminary-Drvmdk -DPART_LM4F120H5QR-o .\portinitializations.o --omf_browse .\portinitializations.crf --depend .\portinitializations.d)
+I (tm4c123gh6pm.h)(0x5D93F682)
+F (.\PWM.c)(0x5D95557D)(-c --cpu Cortex-M4 -D__EVAL -g -O0 --apcs=interwork --split_sections --signed_chars -I.. -I..\..\..-I C:\Keil\ARM\RV31\INC-I C:\Keil\ARM\CMSIS\Include-I C:\Keil\ARM\Inc\Luminary-Drvmdk -DPART_LM4F120H5QR-o .\pwm.o --omf_browse .\pwm.crf --depend .\pwm.d)
+I (C:\Keil\ARM\ARMCC\include\stdint.h)(0x51C89844)
+I (tm4c123gh6pm.h)(0x5D93F682)
+F (.\UART.c)(0x5D93F682)(-c --cpu Cortex-M4 -D__EVAL -g -O0 --apcs=interwork --split_sections --signed_chars -I.. -I..\..\..-I C:\Keil\ARM\RV31\INC-I C:\Keil\ARM\CMSIS\Include-I C:\Keil\ARM\Inc\Luminary-Drvmdk -DPART_LM4F120H5QR-o .\uart.o --omf_browse .\uart.crf --depend .\uart.d)
+I (UART.h)(0x5D93F682)
+I (tm4c123gh6pm.h)(0x5D93F682)
+F (.\Nokia5110.c)(0x5D93F682)(-c --cpu Cortex-M4 -D__EVAL -g -O0 --apcs=interwork --split_sections --signed_chars -I.. -I..\..\..-I C:\Keil\ARM\RV31\INC-I C:\Keil\ARM\CMSIS\Include-I C:\Keil\ARM\Inc\Luminary-Drvmdk -DPART_LM4F120H5QR-o .\nokia5110.o --omf_browse .\nokia5110.crf --depend .\nokia5110.d)
+I (Nokia5110.h)(0x5D93F682)
+F (.\uartCommunication.c)(0x5D93FA42)(-c --cpu Cortex-M4 -D__EVAL -g -O0 --apcs=interwork --split_sections --signed_chars -I.. -I..\..\..-I C:\Keil\ARM\RV31\INC-I C:\Keil\ARM\CMSIS\Include-I C:\Keil\ARM\Inc\Luminary-Drvmdk -DPART_LM4F120H5QR-o .\uartcommunication.o --omf_browse .\uartcommunication.crf --depend .\uartcommunication.d)
+I (C:\Keil\ARM\ARMCC\include\stdio.h)(0x51C89844)
+I (C:\Keil\ARM\ARMCC\include\stdlib.h)(0x51C89844)
+I (C:\Keil\ARM\ARMCC\include\math.h)(0x51C89844)
+I (C:\Keil\ARM\ARMCC\include\string.h)(0x51C89844)
+F (.\PLL.c)(0x5D93F88F)(-c --cpu Cortex-M4 -D__EVAL -g -O0 --apcs=interwork --split_sections --signed_chars -I.. -I..\..\..-I C:\Keil\ARM\RV31\INC-I C:\Keil\ARM\CMSIS\Include-I C:\Keil\ARM\Inc\Luminary-Drvmdk -DPART_LM4F120H5QR-o .\pll.o --omf_browse .\pll.crf --depend .\pll.d)
+I (PLL.h)(0x5D93F88C)
+F (.\projectComments.txt)(0x5D93F7FA)()
+F (.\robotArmMovement.c)(0x5D955643)(-c --cpu Cortex-M4 -D__EVAL -g -O0 --apcs=interwork --split_sections --signed_chars -I.. -I..\..\..-I C:\Keil\ARM\RV31\INC-I C:\Keil\ARM\CMSIS\Include-I C:\Keil\ARM\Inc\Luminary-Drvmdk -DPART_LM4F120H5QR-o .\robotarmmovement.o --omf_browse .\robotarmmovement.crf --depend .\robotarmmovement.d)
+I (delayFunctions.h)(0x5D9406F3)
+I (PWM.h)(0x5D9555CB)
+I (C:\Keil\ARM\ARMCC\include\stdint.h)(0x51C89844)
+I (tm4c123gh6pm.h)(0x5D93F682)
+F (.\delayFunctions.c)(0x5D951EE8)(-c --cpu Cortex-M4 -D__EVAL -g -O0 --apcs=interwork --split_sections --signed_chars -I.. -I..\..\..-I C:\Keil\ARM\RV31\INC-I C:\Keil\ARM\CMSIS\Include-I C:\Keil\ARM\Inc\Luminary-Drvmdk -DPART_LM4F120H5QR-o .\delayfunctions.o --omf_browse .\delayfunctions.crf --depend .\delayfunctions.d)
+I (delayFunctions.h)(0x5D9406F3)

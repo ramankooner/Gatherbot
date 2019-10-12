@@ -6,7 +6,16 @@
 	
 	- Need to add two more PWM signals for the motor
 	- Add more PWM Duty cycles for a smoother motion using a single function 
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------	
 	
+	COMMENTS FROM 10/11/2019
+	
+	MAKE SURE THE UART COMMUNICATION RESETS THE BUFFER ON BAD DATA
+	
+	TEST THE PWM FOR PD0 AND PD1
+
 --------------------------------------------------------------------------------------------------------------------------------------------------------------	
 	
 	COMMENTS FROM 9/29/2019
