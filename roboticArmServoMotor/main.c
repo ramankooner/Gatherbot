@@ -12,16 +12,26 @@
 #include "robotArmMovement.h"
 #include "delayFunctions.h"
 
+#define KP 0.1
+#define KI 0.1
+#define KD 0.1
+
 // GPIO & Miscellaneous Functions
 void EnableInterrupts(void);
+void controlLoop(void);
 
 unsigned char n;
 int i;
 
+// UART Variables
 char buffer[7];
 int check_value, check_sum;
 int finalXCoordinateValue, finalYCoordinateValue;
 int checkDisplay;
+
+// PID Controller Variables
+int error, setPoint, processVariable;
+int proportionalControl, integralControl, derivativeControl;
 
 int main(void){
 	
@@ -127,5 +137,15 @@ int main(void){
 		Nokia5110_SetCursor(3,4);
 		Nokia5110_OutUDec(checkDisplay); */
 	}
+}
+
+void controlLoop(void) {
+	
+	error = setPoint - processVariable;
+	
+	// Proportional Control
+	proportionalControl = error * KP;
+	
+	
 }
 
