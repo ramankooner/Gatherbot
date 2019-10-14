@@ -50,7 +50,7 @@ int main(void){
 	*/
 	
 	// PB6
-  M0PWM0_Init(15625, 14000);
+	M0PWM0_Init(15625, 14000);
 
 	// PB7 NEW
 	M0PWM1_Init_new(15625, 14000);
