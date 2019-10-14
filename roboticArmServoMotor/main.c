@@ -144,6 +144,8 @@ int main(void){
 		Nokia5110_SetCursor(3,4);
 		Nokia5110_OutUDec(checkDisplay); */
 		
+		
+		// Execute PID Loop if a ball is in view of the camera
 		motorSpeed = controlLoop(320, finalXCoordinateValue);
 		motorPIDcontrol(motorSpeed);
 	}
@@ -179,7 +181,7 @@ void motorPIDcontrol(float motorPIDOutput) {
 	float leftMotorSpeed;
 	float rightMotorSpeed;
 	
-	// The Motors are going at half speed and will change based on PID Output
+	// The Motors are going at 51% duty and will change based on PID Output
 	leftMotorSpeed = 8000 - motorPIDOutput;
 	rightMotorSpeed = 8000 - motorPIDOutput;
 	
