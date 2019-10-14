@@ -2,6 +2,11 @@
 #include "PWM.h"
 #include "tm4c123gh6pm.h"
 
+// JOINT 1 - BOTTOM SERVO - PB5
+// JOINT 2 - SECOND SERVO - PB6
+// JOINT 3 - THIRD SERVO  - PB7
+// JOINT 4 - HAND         - PB4
+
 // GPIO Port F Initializations
 void PortF_RobotMovement(void){ 
 	volatile unsigned long delay;
