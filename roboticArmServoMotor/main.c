@@ -12,13 +12,15 @@
 #include "robotArmMovement.h"
 #include "delayFunctions.h"
 
-#define KP 0.1
-#define KI 0.1
-#define KD 0.1
+#define Kp 0.1
+#define Ki 0.1
+#define Kd 0.1
+
+#define dt 0.01 // Execution Time of the Loop
 
 // GPIO & Miscellaneous Functions
 void EnableInterrupts(void);
-void controlLoop(void);
+float controlLoop(float setPoint, float processVariable);
 
 unsigned char n;
 int i;
@@ -28,10 +30,6 @@ char buffer[7];
 int check_value, check_sum;
 int finalXCoordinateValue, finalYCoordinateValue;
 int checkDisplay;
-
-// PID Controller Variables
-int error, setPoint, processVariable;
-int proportionalControl, integralControl, derivativeControl;
 
 int main(void){
 	
@@ -139,13 +137,28 @@ int main(void){
 	}
 }
 
-void controlLoop(void) {
+float controlLoop(float setPoint, float processVariable) {
+	
+	static float preError = 0;
+	static float integralControl = 0;
+	float error;
+	float derivativeControl;
+	float outputControl;
 	
 	error = setPoint - processVariable;
 	
-	// Proportional Control
-	proportionalControl = error * KP;
+	// Integral Control
+	integralControl = integralControl + (error * dt);
 	
+	// Derivative Control
+	derivativeControl = (error - preError)/dt;
 	
+	// Output
+	// Output should be a ratio of the two PWMs
+	outputControl = (error * Kp) + (integralControl * Ki) + (derivativeControl * Kd);
+	
+	preError = error;
+	
+	return outputControl;
 }
 
