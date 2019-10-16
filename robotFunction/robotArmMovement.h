@@ -14,3 +14,5 @@ void pickUp(void);
 
 void increasePWM(uint16_t x1, uint16_t x2, void (*f)(uint16_t));
 void decreasePWM(uint16_t x1, uint16_t x2, void (*f)(uint16_t)); 
+
+void armMovement(void);

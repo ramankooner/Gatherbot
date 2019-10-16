@@ -59,10 +59,7 @@ int main(void){
 	M0PWM1_Init_new(15625, 1800); //PB7 - Reset Height	
 	
 	// EXECUTE ROBOTIC ARM MOVEMENT
-	pickUp();
-	resetArm();
-	dropArm();
-	resetArm();
+	armMovement();
 	*/
 		
 	// NOTE - CHANGE THIS TO WORK WITH PD0 AND PD1

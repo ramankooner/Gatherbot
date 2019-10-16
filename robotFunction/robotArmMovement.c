@@ -108,6 +108,13 @@ void pickUp(void){
 	decreasePWM(850, 400, M0PWM0_Duty); // PB6
 }
 
+void armMovement(void) {
+	pickUp();
+	resetArm();
+	dropArm();
+	resetArm();
+}
+
 /*
 void oldPickUp(void) {
 	Delay2();
