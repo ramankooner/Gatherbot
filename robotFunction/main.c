@@ -11,6 +11,8 @@
 #include "PLL.h"
 #include "robotArmMovement.h"
 #include "delayFunctions.h"
+#include <stdio.h>
+#include <math.h>
 
 #define Kp 0.1
 #define Ki 0.1
@@ -21,7 +23,8 @@
 // GPIO & Miscellaneous Functions
 void EnableInterrupts(void);
 float controlLoop(float setPoint, float processVariable);
-
+void motorPIDcontrol(float motorPIDOutput);
+	
 unsigned char n;
 int i;
 
@@ -31,6 +34,11 @@ int check_value, check_sum;
 int finalXCoordinateValue, finalYCoordinateValue;
 int checkDisplay;
 
+// Motor Control
+int leftPWMSpeed;
+int rightPWMSpeed;
+float motorSpeed; 
+	
 int main(void){
 	
 	PLL_Init();
@@ -73,7 +81,7 @@ int main(void){
 	// GPIO_PORTD_DATA_R = 0x14;
 	
 	// PB6
-  M0PWM0_Init(15625, 14000);
+	M0PWM0_Init(15625, 14000);
 
 	// PB7 
 	M0PWM1_Init_new(15625, 14000);
@@ -88,6 +96,7 @@ int main(void){
 	GPIO_PORTF_DATA_R = 0x08;
 		
 	while(1) {
+		
 		/*
 		// UART COMMUNICATION
 		for ( i = 0; i < sizeof(buffer); i++) {
@@ -134,6 +143,11 @@ int main(void){
 		
 		Nokia5110_SetCursor(3,4);
 		Nokia5110_OutUDec(checkDisplay); */
+		
+		
+		// Execute PID Loop if a ball is in view of the camera
+		motorSpeed = controlLoop(320, finalXCoordinateValue);
+		motorPIDcontrol(motorSpeed);
 	}
 }
 
@@ -148,10 +162,10 @@ float controlLoop(float setPoint, float processVariable) {
 	error = setPoint - processVariable;
 	
 	// Integral Control
-	integralControl = integralControl + (error * dt);
+	integralControl = integralControl + error;
 	
 	// Derivative Control
-	derivativeControl = (error - preError)/dt;
+	derivativeControl = error - preError;
 	
 	// Output
 	// Output should be a ratio of the two PWMs
@@ -161,4 +175,23 @@ float controlLoop(float setPoint, float processVariable) {
 	
 	return outputControl;
 }
+
+void motorPIDcontrol(float motorPIDOutput) {
+	
+	float leftMotorSpeed;
+	float rightMotorSpeed;
+	
+	// The Motors are going at 51% duty and will change based on PID Output
+	leftMotorSpeed = 8000 - motorPIDOutput;
+	rightMotorSpeed = 8000 + motorPIDOutput;
+	
+	// Get the Floor of the Float Values
+	// Send these Values to the Motor PWMs
+	leftPWMSpeed = floor(leftMotorSpeed);
+	rightPWMSpeed = floor(rightMotorSpeed);
+	
+	//M0PWM6_Duty(leftPWMSpeed);
+	//M0PWM7_Duty(rightPWMSpeed);
+}
+
 
