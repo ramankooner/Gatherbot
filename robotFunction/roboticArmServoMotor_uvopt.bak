@@ -180,20 +180,9 @@
       <GroupNumber>1</GroupNumber>
       <FileNumber>2</FileNumber>
       <FileType>1</FileType>
-      <tvExp>0</tvExp>
+      <tvExp>1</tvExp>
       <Focus>0</Focus>
-<<<<<<< HEAD:roboticArmServoMotor/roboticArmServoMotor.uvopt
-      <ColumnNumber>14</ColumnNumber>
-      <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>158</TopLine>
-      <CurrentLine>190</CurrentLine>
-=======
-<<<<<<< HEAD
-      <ColumnNumber>6</ColumnNumber>
-      <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>121</TopLine>
-      <CurrentLine>23</CurrentLine>
-=======
+<<<<<<< HEAD:roboticArmServoMotor/roboticArmServoMotor_uvopt.bak
 <<<<<<< HEAD
       <ColumnNumber>16</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -205,8 +194,12 @@
       <TopLine>43</TopLine>
       <CurrentLine>54</CurrentLine>
 >>>>>>> 082b1578de2fd4c945dd30c9fc9d80b091850a98
->>>>>>> bdc9f794902091812dc3f0710808a90ba4dbd164
->>>>>>> 6d25931016d63a9975dc79a075916f5c208a072a:robotFunction/roboticArmServoMotor_uvopt.bak
+=======
+      <ColumnNumber>26</ColumnNumber>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <TopLine>173</TopLine>
+      <CurrentLine>186</CurrentLine>
+>>>>>>> 6d25931016d63a9975dc79a075916f5c208a072a:robotFunction/roboticArmServoMotor.uvopt
       <bDave2>0</bDave2>
       <PathWithFileName>.\main.c</PathWithFileName>
       <FilenameWithoutPath>main.c</FilenameWithoutPath>
@@ -219,10 +212,24 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>1</ColumnNumber>
+<<<<<<< HEAD:roboticArmServoMotor/roboticArmServoMotor_uvopt.bak
+<<<<<<< HEAD
+      <ColumnNumber>27</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>17</TopLine>
-      <CurrentLine>44</CurrentLine>
+      <TopLine>2</TopLine>
+      <CurrentLine>28</CurrentLine>
+=======
+      <ColumnNumber>30</ColumnNumber>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <TopLine>1</TopLine>
+      <CurrentLine>35</CurrentLine>
+>>>>>>> 082b1578de2fd4c945dd30c9fc9d80b091850a98
+=======
+      <ColumnNumber>0</ColumnNumber>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <TopLine>0</TopLine>
+      <CurrentLine>0</CurrentLine>
+>>>>>>> 6d25931016d63a9975dc79a075916f5c208a072a:robotFunction/roboticArmServoMotor.uvopt
       <bDave2>0</bDave2>
       <PathWithFileName>.\portInitializations.c</PathWithFileName>
       <FilenameWithoutPath>portInitializations.c</FilenameWithoutPath>
@@ -233,12 +240,22 @@
       <GroupNumber>1</GroupNumber>
       <FileNumber>4</FileNumber>
       <FileType>1</FileType>
-      <tvExp>0</tvExp>
+      <tvExp>1</tvExp>
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>1</TopLine>
+<<<<<<< HEAD:roboticArmServoMotor/roboticArmServoMotor_uvopt.bak
+<<<<<<< HEAD
+      <TopLine>13</TopLine>
       <CurrentLine>1</CurrentLine>
+=======
+      <TopLine>187</TopLine>
+      <CurrentLine>210</CurrentLine>
+>>>>>>> 082b1578de2fd4c945dd30c9fc9d80b091850a98
+=======
+      <TopLine>0</TopLine>
+      <CurrentLine>0</CurrentLine>
+>>>>>>> 6d25931016d63a9975dc79a075916f5c208a072a:robotFunction/roboticArmServoMotor.uvopt
       <bDave2>0</bDave2>
       <PathWithFileName>.\PWM.c</PathWithFileName>
       <FilenameWithoutPath>PWM.c</FilenameWithoutPath>
@@ -253,8 +270,8 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>1</TopLine>
-      <CurrentLine>2</CurrentLine>
+      <TopLine>0</TopLine>
+      <CurrentLine>0</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\UART.c</PathWithFileName>
       <FilenameWithoutPath>UART.c</FilenameWithoutPath>
@@ -331,15 +348,14 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>0</ColumnNumber>
+      <ColumnNumber>11</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-<<<<<<< HEAD:roboticArmServoMotor/roboticArmServoMotor.uvopt
-      <TopLine>0</TopLine>
-      <CurrentLine>0</CurrentLine>
+<<<<<<< HEAD:roboticArmServoMotor/roboticArmServoMotor_uvopt.bak
+      <TopLine>29</TopLine>
 =======
-      <TopLine>31</TopLine>
+      <TopLine>32</TopLine>
+>>>>>>> 6d25931016d63a9975dc79a075916f5c208a072a:robotFunction/roboticArmServoMotor.uvopt
       <CurrentLine>53</CurrentLine>
->>>>>>> 6d25931016d63a9975dc79a075916f5c208a072a:robotFunction/roboticArmServoMotor_uvopt.bak
       <bDave2>0</bDave2>
       <PathWithFileName>.\robotArmMovement.c</PathWithFileName>
       <FilenameWithoutPath>robotArmMovement.c</FilenameWithoutPath>
