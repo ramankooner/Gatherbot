@@ -98,62 +98,72 @@ int main(void){
 	
 	while(1) {
 		
-		/*
 		// UART COMMUNICATION
 		
-		//if (uartFlag == 1) {
-		
-		for ( i = 0; i < sizeof(buffer); i++) {
-			n = UART_InChar();
+		if (uartFlag == 1) {
 			
-			buffer[i] = n;
-		}
-		
-		check_value = buffer[0] + buffer[1] + buffer[2] + buffer[3] + buffer[4] + buffer[5];
-		
-		check_sum = check_value & 0x7F;
-		
-		// Data is good
-		if (check_sum == buffer[6]) {
-			GPIO_PORTF_DATA_R = 0x08;
-			
-			if (buffer[0] == 0x41) {
-				// Display the check sum from PI as a decimal
-				checkDisplay = (int) buffer[6];
-		
-				// Convert the X and Y coordinates to Decimal numbers
-				finalXCoordinateValue = charToDecimal(buffer[2], buffer[3]);
-		
-				finalYCoordinateValue = charToDecimal(buffer[4], buffer[5]);
-			}
-		} 
-		
-		// Data is corrupt
-		else {
-			GPIO_PORTF_DATA_R = 0x02; 
-			//uartFlag = 0;
-		}
-		
-		//}
-		
-		// UART FLAG IS 0
-		//else {
-		
-				// Empty the buffer
-				//for(k = 0; k < sizeof(buffer); k++) {
-				//	buffer[k] = 0;
-				//}
+			// Fill the buffer with data from Raspberry Pi
+			for ( i = 0; i < sizeof(buffer); i++) {
+				n = UART_InChar();
 				
-				// Set Flag back to 1 so the buffer can take in data again
-				// uartFlag = 1;
-		//}
+				buffer[i] = n;
+			}
+			
+			// Calculate check sum for error checking
+			check_value = buffer[0] + buffer[1] + buffer[2] + buffer[3] + buffer[4] + buffer[5];
+			
+			check_sum = check_value & 0x7F;
+			
+			// Data is good
+			if (check_sum == buffer[6]) {
+				GPIO_PORTF_DATA_R = 0x08;
+				
+				// Start byte is correct -- 0x41
+				if (buffer[0] == 0x41) {
+					// Display the check sum from PI as a decimal
+					checkDisplay = (int) buffer[6];
+			
+					// Convert the X and Y coordinates to Decimal numbers
+					finalXCoordinateValue = charToDecimal(buffer[2], buffer[3]);
+			
+					finalYCoordinateValue = charToDecimal(buffer[4], buffer[5]);
+				}
+				
+				// Start byte is incorrect
+				else {
+					GPIO_PORTF_DATA_R = 0x04;
+					uartFlag = 0;
+				}
+			} 
 		
+			// Data is corrupt
+			else {
+				GPIO_PORTF_DATA_R = 0x02; 
+				uartFlag = 0;
+			}		
+		}
+		
+		// UART FLAG == 0
+		// Error in buffer -- Reset the buffer then start over
+		// Don't care about skipping one coordinate
+		else {
+			// Empty the buffer
+			for(k = 0; k < sizeof(buffer); k++) {
+				buffer[k] = 0;
+			}
+	
+			// Set Flag back to 1 to take in data again
+			uartFlag = 1;
+		}
+		
+		// DISPLAY BUFFER ON LCD
 		Nokia5110_SetCursor(3,0);
 		Nokia5110_OutUDec(finalXCoordinateValue);
 		
 		Nokia5110_SetCursor(3,1);
 		Nokia5110_OutUDec(finalYCoordinateValue);
 		
+		// START BYTE
 		Nokia5110_SetCursor(3,2);
 		Nokia5110_OutChar(buffer[0]);
 		
@@ -161,7 +171,7 @@ int main(void){
 		Nokia5110_OutChar(buffer[1]);
 		
 		Nokia5110_SetCursor(3,4);
-		Nokia5110_OutUDec(checkDisplay); */
+		Nokia5110_OutUDec(checkDisplay); 
 		
 		
 		// Execute PID Loop if a ball is in view of the camera
