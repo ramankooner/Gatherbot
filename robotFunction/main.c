@@ -26,9 +26,10 @@ float controlLoop(float setPoint, float processVariable);
 void motorPIDcontrol(float motorPIDOutput);
 	
 unsigned char n;
-int i;
+int i,k;
 
 // UART Variables
+int uartFlag;
 char buffer[7];
 int check_value, check_sum;
 int finalXCoordinateValue, finalYCoordinateValue;
@@ -91,11 +92,17 @@ int main(void){
 	
 	// GREEN COLOR FOR POWER CHECK
 	GPIO_PORTF_DATA_R = 0x08;
-		
+	
+	// UART Flag
+	uartFlag = 1;
+	
 	while(1) {
 		
 		/*
 		// UART COMMUNICATION
+		
+		//if (uartFlag == 1) {
+		
 		for ( i = 0; i < sizeof(buffer); i++) {
 			n = UART_InChar();
 			
@@ -124,7 +131,22 @@ int main(void){
 		// Data is corrupt
 		else {
 			GPIO_PORTF_DATA_R = 0x02; 
+			//uartFlag = 0;
 		}
+		
+		//}
+		
+		// UART FLAG IS 0
+		//else {
+		
+				// Empty the buffer
+				//for(k = 0; k < sizeof(buffer); k++) {
+				//	buffer[k] = 0;
+				//}
+				
+				// Set Flag back to 1 so the buffer can take in data again
+				// uartFlag = 1;
+		//}
 		
 		Nokia5110_SetCursor(3,0);
 		Nokia5110_OutUDec(finalXCoordinateValue);
