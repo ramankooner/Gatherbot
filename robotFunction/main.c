@@ -14,11 +14,9 @@
 #include <stdio.h>
 #include <math.h>
 
-#define Kp 0.1
-#define Ki 0.1
-#define Kd 0.1
-
-#define dt 0.01 // Execution Time of the Loop
+#define Kp 10
+#define Ki 0
+#define Kd 0
 
 // GPIO & Miscellaneous Functions
 void EnableInterrupts(void);
@@ -180,8 +178,8 @@ int main(void){
 		
 		
 		// Execute PID Loop if a ball is in view of the camera
-		//motorSpeed = controlLoop(320, finalXCoordinateValue);
-		//motorPIDcontrol(motorSpeed);
+		motorSpeed = controlLoop(320, finalXCoordinateValue);
+		motorPIDcontrol(motorSpeed);
 		
 	}
 }
@@ -225,8 +223,8 @@ void motorPIDcontrol(float motorPIDOutput) {
 	leftPWMSpeed = floor(leftMotorSpeed);
 	rightPWMSpeed = floor(rightMotorSpeed);
 	
-	//M0PWM6_Duty(leftPWMSpeed);
-	//M0PWM7_Duty(rightPWMSpeed);
+	M0PWM0_Duty(leftPWMSpeed);
+	M0PWM1_Duty_new(rightPWMSpeed);
 }
 
 
