@@ -34,11 +34,11 @@ void PortD_Init(void){
 	volatile unsigned long delay;
   SYSCTL_RCGC2_R |= 0x00000008;     // 1) D clock
   delay = SYSCTL_RCGC2_R;           // delay   
-  GPIO_PORTD_CR_R |= 0x3F;           // allow changes to PD0-PD5  
-  GPIO_PORTD_AMSEL_R &= ~0x3F;        // 3) disable analog function
+  GPIO_PORTD_CR_R |= 0xFF;           // allow changes to PD0-PD7  
+  GPIO_PORTD_AMSEL_R &= ~0xFF;        // 3) disable analog function
   GPIO_PORTD_PCTL_R &= ~0x000000FF;   // 4) GPIO clear bit PCTL  
   GPIO_PORTD_PCTL_R |= 0x00000044; 
-	GPIO_PORTD_DIR_R |= 0x3F;          // 5) PD5-0 Output
+	GPIO_PORTD_DIR_R |= 0xFF;          // 5) PD7-0 Output
   GPIO_PORTD_AFSEL_R |= 0x00;        // 6) no alternate function    
-  GPIO_PORTD_DEN_R |= 0x3F;          // 7) enable digital pins PD5-0     
+  GPIO_PORTD_DEN_R |= 0xFF;          // 7) enable digital pins PD7-0     
 }

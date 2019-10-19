@@ -72,3 +72,7 @@ int charToDecimal(char coordinate1, char coordinate0) {
 	
 	return finalValue;
 }
+
+int singleCharToDecimal(char distance) {
+	return (int) distance;
+}

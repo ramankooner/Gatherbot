@@ -10,3 +10,5 @@
 // Output: One Decimal Value
 
 int charToDecimal(char coordinate1, char coordinate0);
+
+int singleCharToDecimal(char distance);

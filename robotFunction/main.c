@@ -30,9 +30,11 @@ int i,k;
 
 // UART Variables
 int uartFlag;
-char buffer[7];
+char buffer[8];
+//char buffer[7];
 int check_value, check_sum;
 int finalXCoordinateValue, finalYCoordinateValue;
+int finalDistance;
 int checkDisplay;
 
 // Motor Control
@@ -47,6 +49,8 @@ int main(void){
 	PortF_Init(); //On-board LEDs
 	PortB_Init(); // Motor Direction Control 
 	PortD_Init();
+	Nokia5110_Init();
+	Nokia5110_Clear();
 	GPIO_PORTF_DATA_R = 0x00;
 	
 	/*
@@ -85,9 +89,9 @@ int main(void){
 	M0PWM1_Init_new(15625, 14000);
 
 	// Control the Direction of the Motors
-	// 0x05 - Forward
-	// 0x0A - Backwards
-	GPIO_PORTB_DATA_R = 0x05;
+	// 0x05 - Backwards
+	// 0x0A - Forward
+	GPIO_PORTB_DATA_R = 0x0A;
 	
 	
 	// GREEN COLOR FOR POWER CHECK
@@ -97,56 +101,57 @@ int main(void){
 	uartFlag = 1;
 	
 	while(1) {
-		
+
 		// UART COMMUNICATION
 		
 		if (uartFlag == 1) {
 			
-			// Fill the buffer with data from Raspberry Pi
-			for ( i = 0; i < sizeof(buffer); i++) {
-				n = UART_InChar();
+			n = UART_InChar();
+			
+			if (n == 0x41) {
+				buffer[0] = n;
 				
-				buffer[i] = n;
-			}
-			
-			// Calculate check sum for error checking
-			check_value = buffer[0] + buffer[1] + buffer[2] + buffer[3] + buffer[4] + buffer[5];
-			
-			check_sum = check_value & 0x7F;
-			
-			// Data is good
-			if (check_sum == buffer[6]) {
-				GPIO_PORTF_DATA_R = 0x08;
+				for(i = 1; i < sizeof(buffer); i++) {
+					n = UART_InChar();
+					buffer[i] = n;
+				}
 				
-				// Start byte is correct -- 0x41
-				if (buffer[0] == 0x41) {
+				check_value = buffer[0] + buffer[1] + buffer[2] + buffer[3] + buffer[4] + buffer[5] + buffer[6];
+			
+				check_sum = check_value & 0x7F;
+				
+				if(check_sum == buffer[7]) {
+					
+					GPIO_PORTF_DATA_R = 0x08;
+					
 					// Display the check sum from PI as a decimal
-					checkDisplay = (int) buffer[6];
+					checkDisplay = (int) buffer[7];
 			
 					// Convert the X and Y coordinates to Decimal numbers
 					finalXCoordinateValue = charToDecimal(buffer[2], buffer[3]);
 			
 					finalYCoordinateValue = charToDecimal(buffer[4], buffer[5]);
+					
+					// Convert Distance to Decimal Number
+					finalDistance = singleCharToDecimal(buffer[6]);
 				}
 				
-				// Start byte is incorrect
 				else {
-					GPIO_PORTF_DATA_R = 0x04;
+					GPIO_PORTF_DATA_R = 0x02;
 					uartFlag = 0;
 				}
-			} 
-		
-			// Data is corrupt
+			}
+			
 			else {
-				GPIO_PORTF_DATA_R = 0x02; 
+				GPIO_PORTF_DATA_R = 0x04;
 				uartFlag = 0;
-			}		
+			}
 		}
 		
 		// UART FLAG == 0
 		// Error in buffer -- Reset the buffer then start over
 		// Don't care about skipping one coordinate
-		else {
+		if (uartFlag == 0) {
 			// Empty the buffer
 			for(k = 0; k < sizeof(buffer); k++) {
 				buffer[k] = 0;
@@ -158,25 +163,26 @@ int main(void){
 		
 		// DISPLAY BUFFER ON LCD
 		Nokia5110_SetCursor(3,0);
-		Nokia5110_OutUDec(finalXCoordinateValue);
+		Nokia5110_OutUDec(buffer[0]);
 		
 		Nokia5110_SetCursor(3,1);
-		Nokia5110_OutUDec(finalYCoordinateValue);
+		Nokia5110_OutUDec(buffer[1]);
 		
 		// START BYTE
 		Nokia5110_SetCursor(3,2);
-		Nokia5110_OutChar(buffer[0]);
+		Nokia5110_OutUDec(finalXCoordinateValue);
 		
 		Nokia5110_SetCursor(3,3);
-		Nokia5110_OutChar(buffer[1]);
+		Nokia5110_OutUDec(finalDistance);
 		
 		Nokia5110_SetCursor(3,4);
 		Nokia5110_OutUDec(checkDisplay); 
 		
 		
 		// Execute PID Loop if a ball is in view of the camera
-		motorSpeed = controlLoop(320, finalXCoordinateValue);
-		motorPIDcontrol(motorSpeed);
+		//motorSpeed = controlLoop(320, finalXCoordinateValue);
+		//motorPIDcontrol(motorSpeed);
+		
 	}
 }
 
