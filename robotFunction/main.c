@@ -1,7 +1,7 @@
 // Servo Motor - Robotic Arm: Created 7/21/2019
 // Added UART Communication Protocol - 9/12/2019
 // Added Robotic Arm Movement - 9/29/2019
-
+// Test
 #include "tm4c123gh6pm.h"
 #include "PWM.h"
 #include "portInitializations.h"
