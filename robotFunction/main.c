@@ -15,10 +15,10 @@
 #include <math.h>
 
 
-// Consider: 24 0 15 / 24 0 0 / 12 0 0
-#define Kp 17
-#define Ki 0
-#define Kd 10
+// Consider: 24 0 15 / 24 0 0 / 12 0 0 / 21 0.009 0.00009
+#define Kp 21
+#define Ki 0.009
+#define Kd 0.00009
 
 // GPIO & Miscellaneous Functions
 void EnableInterrupts(void);
@@ -182,8 +182,8 @@ int main(void){
 		
 		
 		// Execute PID Loop if a ball is in view of the camera
-		if (finalDistance > 10){
-			motorSpeed = controlLoop(320, finalXCoordinateValue);
+		if (finalDistance > 12){
+			motorSpeed = controlLoop(300, finalXCoordinateValue);
 			motorPIDcontrol(motorSpeed);
 		}
 		else{
@@ -219,6 +219,13 @@ float controlLoop(float setPoint, float processVariable) {
 	preError = error;
 	if (error == 0) GPIO_PORTF_DATA_R = 0x0A;
 	else GPIO_PORTF_DATA_R = 0x0C;
+	
+	/*
+	if((error >= -40) && (error < 40)) {
+		outputControl = 0;
+	}
+	*/
+	
 	return outputControl;
 	
 }
@@ -232,10 +239,10 @@ void motorPIDcontrol(float motorPIDOutput) {
 	leftMotorSpeed = 6000 - motorPIDOutput;
 	rightMotorSpeed = 6000 + motorPIDOutput;
 	
-	if((motorPIDOutput > -10) && (motorPIDOutput < 10)) {
-		leftMotorSpeed = 2;
-		rightMotorSpeed = 2;
-	}
+	if(leftMotorSpeed < 0) leftMotorSpeed = 2;
+	else if (leftMotorSpeed > 15000) leftMotorSpeed = 15000;
+	if(rightMotorSpeed < 0) rightMotorSpeed = 2;
+	else if (rightMotorSpeed > 15000) rightMotorSpeed = 15000;	
 	
 	// Get the Floor of the Float Values
 	// Send these Values to the Motor PWMs
@@ -253,5 +260,3 @@ void motorPIDcontrol(float motorPIDOutput) {
 	M0PWM0_Duty(leftPWMSpeed);
 	M0PWM1_Duty_new(rightPWMSpeed);
 }
-
-
