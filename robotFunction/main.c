@@ -242,6 +242,13 @@ int main(void){
 					
 					// Execute the Drop Off Movement
 					dropOffMovement();
+					
+					//Delay2();
+					
+					// Reset the Ball Count
+					//ballCount = 0;
+					
+					// Start Searching for new Ping Pong Balls
 				}
 				else {
 					
@@ -291,6 +298,12 @@ int main(void){
 			else if (finalDistance == 6) {
 				M0PWM0_Duty(3);
 				M0PWM1_Duty_new(3);
+				
+				// Execute Arm Pick Up Motion
+				// pickUpValue = armPickUpLocation(finalXCoordinateValue);
+				// armMovement(pickUpValue);
+				// Delay2();
+				// ballCount++;
 			}
 			else {
 				GPIO_PORTF_DATA_R = 0x08;
