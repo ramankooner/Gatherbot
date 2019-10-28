@@ -65,21 +65,22 @@ void dropArm(void){
 	M0PWM3_Duty(255); //PB5 - To Drop Off
 	Delay2();
 	Delay2();
-	M1PWM3_Duty(320);  //Hand drops ball
+	M0PWM2_Duty(320);  //Hand drops ball
 }
 
-void pickUp(void){
+void pickUp(int pickUpValue){
 	
 	// RESET JOINTS TO RESET POSITIONS
 	Delay2();
-	M0PWM3_Duty(700); //Center PB5
+	M0PWM3_Duty(pickUpValue); //Center PB5
 	Delay2();
-	M1PWM3_Duty(320); //Open hand PA7
+	M0PWM2_Duty(320); //Open hand PA7
 	Delay2();
 	M0PWM0_Duty(400); //Reset Joint 2 PB6
 	Delay2();
 	M0PWM1_Duty_new(1800); // Reset Joint 3 PB7
 	Delay2();
+	
 	
 	// START THE MOVEMENT
 	increasePWM(400, 850, M0PWM0_Duty); // PB6
@@ -97,7 +98,7 @@ void pickUp(void){
 	
 	// PICK UP THE BALL
 	GPIO_PORTF_DATA_R = 0x02;
-	M1PWM3_Init(15625, 550); //Grab  PA7
+	M0PWM2_Init(15625, 560); //Grab  PA7
 	
 	// GET ARM READY FOR DROP OFF
 	Delay2();
@@ -108,11 +109,24 @@ void pickUp(void){
 	decreasePWM(850, 400, M0PWM0_Duty); // PB6
 }
 
-void armMovement(void) {
-	pickUp();
+float armPickUpLocation(int xCord) {
+	float pickUpPWM;
+	
+	pickUpPWM = (-xCord/3) + 753;
+	
+	return pickUpPWM;
+}
+
+
+void armMovement(int pickUpCoord) {
+	pickUp(pickUpCoord);
 	resetArm();
 	dropArm();
 	resetArm();
+}
+
+void dropOffMovement(void) {
+	// EDIT THIS FUNCTION SO ROBOT DOES A 180 TURN
 }
 
 /*
@@ -120,7 +134,7 @@ void oldPickUp(void) {
 	Delay2();
 	M0PWM3_Duty(700); //Center PB5
 	Delay2();
-	M1PWM3_Duty(320); //Open hand PA7
+	M0PWM2_Duty(320); //Open hand PA7
 	Delay2();
 	M0PWM0_Duty(400); //Reset Joint 2 PB6
 	Delay2();
@@ -150,7 +164,7 @@ void oldPickUp(void) {
 	Delay2();
 	Delay2();
 	Delay2();
-	M1PWM3_Init(15625, 550); //Grab  PA7
+	M0PWM2_Init(15625, 550); //Grab  PA7
 	Delay2();
 	M0PWM0_Duty(850); // PB6
 	Delay2();

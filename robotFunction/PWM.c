@@ -117,7 +117,7 @@ void M0PWM2_Init(uint16_t period, uint16_t duty) {
 	delay = SYSCTL_RCGCGPIO_R;
 	GPIO_PORTB_AFSEL_R |= 0x10;           // Alt funct on PB4
 	GPIO_PORTB_PCTL_R &= 0xFFF0FFFF;      // configure PB4 as M0PWM2
-	GPIO_PORTB_PCTL_R |= 0x00F40000;
+	GPIO_PORTB_PCTL_R |= 0x00040000;
 	GPIO_PORTB_DIR_R |= 0x10;             // Set PB4 output
 	GPIO_PORTB_AMSEL_R &= ~0x10;          // disable analong funct on PB4
 	GPIO_PORTB_DEN_R |= 0x10;             // enable digital I/O on PB4
@@ -129,11 +129,13 @@ void M0PWM2_Init(uint16_t period, uint16_t duty) {
   SYSCTL_RCC_R += SYSCTL_RCC_PWMDIV_64;  //    configure for /64 divider       
 	
 	PWM0_1_CTL_R = 0x00;                  // re-loading down
-	PWM0_1_GENA_R |= 0x00000C08;          // low on load
+	PWM0_1_GENA_R |= 0x000000C8;          // low on load
 	PWM0_1_LOAD_R = period - 1;           // cycles needed to count to 0
 	PWM0_1_CMPA_R = duty;                 // count value when output rises
 	PWM0_1_CTL_R |= 0x00000001;           // start PWM0
 	PWM0_ENABLE_R |= 0x04;                // enable M0PWM2
+	
+	
 }
 
 void M0PWM2_Duty(uint16_t duty) {
@@ -199,7 +201,7 @@ void M0PWM6_Init(uint16_t period, uint16_t duty) {
   SYSCTL_RCC_R += SYSCTL_RCC_PWMDIV_64;  //    configure for /64 divider       
 	
 	PWM0_3_CTL_R = 0x00;                  // re-loading down
-	PWM0_3_GENA_R |= 0x00000C08;          // low on load
+	PWM0_3_GENA_R |= 0x000000C8;          // low on load
 	PWM0_3_LOAD_R = period - 1;           // cycles needed to count to 0
 	PWM0_3_CMPA_R = duty;                 // count value when output rises
 	PWM0_3_CTL_R |= 0x00000001;           // start PWM0

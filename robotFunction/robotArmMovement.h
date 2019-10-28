@@ -9,10 +9,17 @@ void dropArm(void);
 
 // Pick up the ball from the ground
 // Ball will be about 6 inches from center of the car
-void pickUp(void);
+void pickUp(int pickUpValue);
 
-
+// Increases or Decreases the PWM for interpolation
 void increasePWM(uint16_t x1, uint16_t x2, void (*f)(uint16_t));
 void decreasePWM(uint16_t x1, uint16_t x2, void (*f)(uint16_t)); 
 
-void armMovement(void);
+// Used to change the PWM on the first joint to adjust to the x-coordinate
+float armPickUpLocation(int xCord);
+
+// Executes the Full Arm Movement
+void armMovement(int pickUpCoord);
+
+// Executes a 180 turn so robot will reverse onto drop off location
+void dropOffMovement(void);
