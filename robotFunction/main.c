@@ -14,9 +14,11 @@
 #include <stdio.h>
 #include <math.h>
 
-#define Kp 10
-#define Ki 0
-#define Kd 0
+
+// Consider: 24 0 15 / 24 0 0 / 12 0 0 / 21 0.009 0.00009
+#define Kp 21
+#define Ki 0.009
+#define Kd 0.00009
 
 // GPIO & Miscellaneous Functions
 void EnableInterrupts(void);
@@ -81,10 +83,10 @@ int main(void){
 	// GPIO_PORTD_DATA_R = 0x14;
 	
 	// PB6
-	M0PWM0_Init(15625, 14000);
+	M0PWM0_Init(15625, 6000);
 
 	// PB7 
-	M0PWM1_Init_new(15625, 14000);
+	M0PWM1_Init_new(15625, 6000);
 
 	// Control the Direction of the Motors
 	// 0x05 - Backwards
@@ -93,7 +95,7 @@ int main(void){
 	
 	
 	// GREEN COLOR FOR POWER CHECK
-	GPIO_PORTF_DATA_R = 0x08;
+	//GPIO_PORTF_DATA_R = 0x08;
 	
 	// UART Flag
 	uartFlag = 1;
@@ -120,7 +122,7 @@ int main(void){
 				
 				if(check_sum == buffer[7]) {
 					
-					GPIO_PORTF_DATA_R = 0x08;
+					//GPIO_PORTF_DATA_R = 0x08;
 					
 					// Display the check sum from PI as a decimal
 					checkDisplay = (int) buffer[7];
@@ -135,13 +137,13 @@ int main(void){
 				}
 				
 				else {
-					GPIO_PORTF_DATA_R = 0x02;
+					//GPIO_PORTF_DATA_R = 0x02;
 					uartFlag = 0;
 				}
 			}
 			
 			else {
-				GPIO_PORTF_DATA_R = 0x04;
+				//GPIO_PORTF_DATA_R = 0x04;
 				uartFlag = 0;
 			}
 		}
@@ -159,12 +161,14 @@ int main(void){
 			uartFlag = 1;
 		}
 		
+		/*
 		// DISPLAY BUFFER ON LCD
 		Nokia5110_SetCursor(3,0);
 		Nokia5110_OutUDec(buffer[0]);
 		
 		Nokia5110_SetCursor(3,1);
 		Nokia5110_OutUDec(buffer[1]);
+		*/
 		
 		// START BYTE
 		Nokia5110_SetCursor(3,2);
@@ -178,8 +182,16 @@ int main(void){
 		
 		
 		// Execute PID Loop if a ball is in view of the camera
-		motorSpeed = controlLoop(320, finalXCoordinateValue);
-		motorPIDcontrol(motorSpeed);
+		if (finalDistance > 12){
+			motorSpeed = controlLoop(300, finalXCoordinateValue);
+			motorPIDcontrol(motorSpeed);
+		}
+		else{
+			// Update Speeds
+			M0PWM0_Duty(3);
+			M0PWM1_Duty_new(3);
+			GPIO_PORTF_DATA_R = 0x02;
+		}
 		
 	}
 }
@@ -205,8 +217,17 @@ float controlLoop(float setPoint, float processVariable) {
 	outputControl = (error * Kp) + (integralControl * Ki) + (derivativeControl * Kd);
 	
 	preError = error;
+	if (error == 0) GPIO_PORTF_DATA_R = 0x0A;
+	else GPIO_PORTF_DATA_R = 0x0C;
+	
+	/*
+	if((error >= -40) && (error < 40)) {
+		outputControl = 0;
+	}
+	*/
 	
 	return outputControl;
+	
 }
 
 void motorPIDcontrol(float motorPIDOutput) {
@@ -215,16 +236,27 @@ void motorPIDcontrol(float motorPIDOutput) {
 	float rightMotorSpeed;
 	
 	// The Motors are going at 51% duty and will change based on PID Output
-	leftMotorSpeed = 8000 - motorPIDOutput;
-	rightMotorSpeed = 8000 + motorPIDOutput;
+	leftMotorSpeed = 6000 - motorPIDOutput;
+	rightMotorSpeed = 6000 + motorPIDOutput;
+	
+	if(leftMotorSpeed < 0) leftMotorSpeed = 2;
+	else if (leftMotorSpeed > 15000) leftMotorSpeed = 15000;
+	if(rightMotorSpeed < 0) rightMotorSpeed = 2;
+	else if (rightMotorSpeed > 15000) rightMotorSpeed = 15000;	
 	
 	// Get the Floor of the Float Values
 	// Send these Values to the Motor PWMs
 	leftPWMSpeed = floor(leftMotorSpeed);
 	rightPWMSpeed = floor(rightMotorSpeed);
 	
+	// DISPLAY BUFFER ON LCD
+	Nokia5110_SetCursor(3,0);
+	Nokia5110_OutUDec(leftPWMSpeed);
+		
+	Nokia5110_SetCursor(3,1);
+	Nokia5110_OutUDec(rightPWMSpeed);
+	
+	// Update Speeds
 	M0PWM0_Duty(leftPWMSpeed);
 	M0PWM1_Duty_new(rightPWMSpeed);
 }
-
-
