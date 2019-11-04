@@ -29,7 +29,7 @@
 void EnableInterrupts(void);
 
 // PID Loop for Centering a Ball
-float controlLoop(float setPoint, float processVariable, float kp, float ki, float kd);
+float controlLoop(float setPoint, float processVariable);
 void motorPIDcontrol(float motorPIDOutput);
 
 // PID Loop for Drop Off Location
@@ -68,7 +68,7 @@ int main(void){
 	PLL_Init();
 	UART_Init();
 	PortF_Init(); //On-board LEDs
-	//PortB_Init(); // Motor Direction Control 
+	PortB_Init(); // Motor Direction Control 
 	//PortD_Init();
 	Nokia5110_Init();
 	Nokia5110_Clear();
@@ -78,6 +78,7 @@ int main(void){
 	
 	// ARM MOVEMENT
 	// Initialize Arm
+	/*
 	M0PWM3_Init(15625, 720);      // PB5 - To Center
 	Delay2();
 	M0PWM0_Init(15625, 400);      // PB6
@@ -85,17 +86,17 @@ int main(void){
 	M0PWM1_Init_new(15625, 1800); // PB7 - Reset Height	
 	Delay2();
 	M0PWM2_Init(15625, 320);      // PB4 - Open hand 
-	
+	*/
 	// EXECUTE ROBOTIC ARM MOVEMENT 
 	
 	
 	// X-coordinate value - TESTING
-	xValue = 492;
+	//xValue = 492;
 
 	// Executes the Pick Up movement only - TESTING
-	pickUpValue = armPickUpLocation(xValue);
+	//pickUpValue = armPickUpLocation(xValue);
 	
-	pickUp((int) pickUpValue);
+	//pickUp((int) pickUpValue);
 	
 	// Executes the Full Arm Motion
 	// armMovement(xValue);
@@ -120,21 +121,21 @@ int main(void){
 	// GPIO_PORTD_DATA_R = 0x14;
 	
 	
-	/* DC MOTOR TEMPORARY
+	
 	// PB6
-	//M0PWM0_Init(15625, 6000);
-
+	M0PWM0_Init(15625, 6000);
+	
 	// PB7 
-	//M0PWM1_Init_new(15625, 6000);
+	M0PWM1_Init_new(15625, 6000);
 
 	// Control the Direction of the Motors
 	// 0x05 - Backwards
 	// 0x0A - Forward
 	GPIO_PORTB_DATA_R = 0x0A;
-	*/
+	
 	
 	// GREEN COLOR FOR POWER CHECK
-	//GPIO_PORTF_DATA_R = 0x08;
+	GPIO_PORTF_DATA_R = 0x08;
 	
 	// UART Flag
 	uartFlag = 1;
@@ -143,23 +144,20 @@ int main(void){
 		
 		// UART COMMUNICATION
 		if (uartFlag == 1) {
-			
 			n = UART_InChar();
 			
-			if (n == 0x41) {
-				
+			if (n == 0x41) { //Start of Package
 				buffer[0] = n;
 				
-				for(i = 1; i < sizeof(buffer); i++) {
+				for(i = 1; i < sizeof(buffer); i++) { //Fetch rest of package
 					n = UART_InChar();
 					buffer[i] = n;
 				}
 				
+				// Check for data corruption
 				check_value = buffer[0] + buffer[1] + buffer[2] + buffer[3] + buffer[4] + buffer[5] + buffer[6];
 				check_sum = check_value & 0x7F;
-				
 				if(check_sum == buffer[7]) {
-	
 					// Display the check sum from PI as a decimal
 					checkDisplay = (int) buffer[7];
 					
@@ -201,6 +199,7 @@ int main(void){
 		Nokia5110_OutUDec(buffer[1]);
 		*/
 		
+		
 		// START BYTE
 		Nokia5110_SetCursor(3,2);
 		Nokia5110_OutUDec(finalXCoordinateValue);
@@ -209,9 +208,25 @@ int main(void){
 		Nokia5110_SetCursor(3,4);
 		Nokia5110_OutUDec(checkDisplay); 
 		
+		
+		// FIND DROP OFF BOX
+		if (finalDistance > 17) {
+			motorSpeed = controlLoop(300, finalXCoordinateValue);
+			motorPIDcontrol(motorSpeed);
+			GPIO_PORTF_DATA_R = 0x08;
+		}
+		else {
+			// Update Speeds to Stop Robot
+			M0PWM0_Duty(3);
+			M0PWM1_Duty_new(3);
+			GPIO_PORTF_DATA_R = 0x02;
+			Delay2();
+			dropOffMovement();
+			
+		}
+		
 		/*
 		// Execute Drop Off Movement if Ball count is max
-		
 		if (ballCount == 5) {
 			// Need to implement a searching algorithm
 			
@@ -240,7 +255,7 @@ int main(void){
 				}
 				else if (dFinalDistance == 6) {
 					
-					// Execute the Drop Off Movement
+					// Execute the Drop Off Movement (Turn Around, Empty Out, Close)
 					dropOffMovement();
 					
 					//Delay2();
@@ -261,6 +276,7 @@ int main(void){
 		*/
 		
 		/*
+		// PICKING UP BALLS
 		// Execute PID Loop if a ball is in view of the camera
 		if (finalDistance > 12) {
 			motorSpeed = controlLoop(300, finalXCoordinateValue, Kp, Ki, Kd);
@@ -317,7 +333,7 @@ int main(void){
 }
 
 // PID CONTROL FOR CENTERING BALL
-float controlLoop(float setPoint, float processVariable, float kp, float ki, float kd) {
+float controlLoop(float setPoint, float processVariable) {
 	
 	static float preError = 0;
 	static float integralControl = 0;
@@ -339,7 +355,7 @@ float controlLoop(float setPoint, float processVariable, float kp, float ki, flo
 	
 	preError = error;
 	if (error == 0) GPIO_PORTF_DATA_R = 0x0A;
-	else GPIO_PORTF_DATA_R = 0x0C;
+	else GPIO_PORTF_DATA_R = 0x04;
 	
 	return outputControl;
 	

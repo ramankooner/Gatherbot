@@ -126,7 +126,30 @@ void armMovement(int pickUpCoord) {
 }
 
 void dropOffMovement(void) {
+	int i;
 	// EDIT THIS FUNCTION SO ROBOT DOES A 180 TURN
+	GPIO_PORTB_DATA_R = 0x09; //One forward, one backward
+	M0PWM0_Duty(8200);
+	M0PWM1_Duty_new(8200);
+	for(i = 0; i < 3; i++){
+		Delay2();
+		GPIO_PORTF_DATA_R = 0x04;
+	}
+	M0PWM0_Duty(3);
+	M0PWM1_Duty_new(3);
+	GPIO_PORTF_DATA_R = 0x08;
+	Delay2();
+	GPIO_PORTB_DATA_R = 0x05;
+	M0PWM0_Duty(6700);
+	M0PWM1_Duty_new(6700);
+	for(i = 0; i < 2; i++){
+		Delay2();
+		GPIO_PORTF_DATA_R = 0x04;
+	}
+	while(1){
+		M0PWM0_Duty(3);
+		M0PWM1_Duty_new(3);
+	}
 }
 
 /*
