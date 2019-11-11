@@ -184,8 +184,13 @@
       <Focus>0</Focus>
       <ColumnNumber>29</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
+<<<<<<< HEAD
       <TopLine>1</TopLine>
       <CurrentLine>12</CurrentLine>
+=======
+      <TopLine>199</TopLine>
+      <CurrentLine>206</CurrentLine>
+>>>>>>> d3b116857710e9506e28af1b9dd1bf8bc06d21eb
       <bDave2>0</bDave2>
       <PathWithFileName>.\main.c</PathWithFileName>
       <FilenameWithoutPath>main.c</FilenameWithoutPath>
@@ -216,7 +221,11 @@
       <Focus>0</Focus>
       <ColumnNumber>13</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
+<<<<<<< HEAD
       <TopLine>163</TopLine>
+=======
+      <TopLine>161</TopLine>
+>>>>>>> d3b116857710e9506e28af1b9dd1bf8bc06d21eb
       <CurrentLine>166</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\PWM.c</PathWithFileName>
@@ -310,10 +319,17 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
+<<<<<<< HEAD
       <ColumnNumber>21</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
       <TopLine>123</TopLine>
       <CurrentLine>139</CurrentLine>
+=======
+      <ColumnNumber>3</ColumnNumber>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <TopLine>129</TopLine>
+      <CurrentLine>137</CurrentLine>
+>>>>>>> d3b116857710e9506e28af1b9dd1bf8bc06d21eb
       <bDave2>0</bDave2>
       <PathWithFileName>.\robotArmMovement.c</PathWithFileName>
       <FilenameWithoutPath>robotArmMovement.c</FilenameWithoutPath>
