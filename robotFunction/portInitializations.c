@@ -39,6 +39,6 @@ void PortD_Init(void){
   GPIO_PORTD_PCTL_R &= ~0x000000FF;   // 4) GPIO clear bit PCTL  
   GPIO_PORTD_PCTL_R |= 0x00000044; 
 	GPIO_PORTD_DIR_R |= 0xFF;          // 5) PD7-0 Output
-  GPIO_PORTD_AFSEL_R |= 0x00;        // 6) no alternate function    
+  GPIO_PORTD_AFSEL_R |= 0x03;        // 6) no alternate function    
   GPIO_PORTD_DEN_R |= 0xFF;          // 7) enable digital pins PD7-0     
 }

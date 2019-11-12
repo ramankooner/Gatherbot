@@ -16,9 +16,10 @@
 
 // Motor PID Control
 // Consider: 24 0 15 / 24 0 0 / 12 0 0 / 21 0.009 0.00009
-#define Kp 21
-#define Ki 0.009
-#define Kd 0.00009
+// 90 .0009 45
+#define Kp 90
+#define Ki 0.0009
+#define Kd 45
 
 // Drop Off PID Control
 #define dKp 0
@@ -68,17 +69,17 @@ int main(void){
 	PLL_Init();
 	UART_Init();
 	PortF_Init(); //On-board LEDs
-	PortB_Init(); // Motor Direction Control 
-	//PortD_Init();
+	PortB_Init(); // Motor Direction Control and Arm Control
+	PortD_Init(); // Motor Movement Control
 	Nokia5110_Init();
 	Nokia5110_Clear();
 	GPIO_PORTF_DATA_R = 0x00;
 	
 	ballCount = 0;
 	
+	/*
 	// ARM MOVEMENT
 	// Initialize Arm
-	/*
 	M0PWM3_Init(15625, 720);      // PB5 - To Center
 	Delay2();
 	M0PWM0_Init(15625, 400);      // PB6
@@ -86,54 +87,33 @@ int main(void){
 	M0PWM1_Init_new(15625, 1800); // PB7 - Reset Height	
 	Delay2();
 	M0PWM2_Init(15625, 320);      // PB4 - Open hand 
-	*/
+	
 	// EXECUTE ROBOTIC ARM MOVEMENT 
-	
-	
 	// X-coordinate value - TESTING
-	//xValue = 492;
-
+	xValue = 80;
+	
 	// Executes the Pick Up movement only - TESTING
-	//pickUpValue = armPickUpLocation(xValue);
+	pickUpValue = armPickUpLocation(xValue);
 	
-	//pickUp((int) pickUpValue);
+	pickUp(pickUpValue);
+	*/
 	
-	// Executes the Full Arm Motion
-	// armMovement(xValue);
-
-
-
 	// MOTOR CONTROL
 	
 	// NOTE - CHANGE THIS TO WORK WITH PD0 AND PD1
 	//      - CHANGE DIRECTION CONTROL TO PD2,PD3,PD4,PD5
 	
 	// PD0
-	//M0PWM6_Init(15625, 14000);
+	M0PWM6_Init(15625, 6000);
 	
 	// PD1
-	//M0PWM7_Init(15625, 14000);
+	M0PWM7_Init(15625, 6000);
 	
-	// PORT D
-	// PD2-PD5
-	// 0x14 - Forward
-	// 0x28 - Backwards
-	// GPIO_PORTD_DATA_R = 0x14;
-	
-	
-	
-	// PB6
-	M0PWM0_Init(15625, 6000);
-	
-	// PB7 
-	M0PWM1_Init_new(15625, 6000);
-
 	// Control the Direction of the Motors
 	// 0x05 - Backwards
 	// 0x0A - Forward
 	GPIO_PORTB_DATA_R = 0x0A;
-	
-	
+
 	// GREEN COLOR FOR POWER CHECK
 	GPIO_PORTF_DATA_R = 0x08;
 	
@@ -210,20 +190,21 @@ int main(void){
 		
 		
 		// FIND DROP OFF BOX
-		if (finalDistance > 17) {
-			motorSpeed = controlLoop(300, finalXCoordinateValue);
+		if (finalDistance > 20) {
+			motorSpeed = controlLoop(80, finalXCoordinateValue);
 			motorPIDcontrol(motorSpeed);
 			GPIO_PORTF_DATA_R = 0x08;
 		}
 		else {
 			// Update Speeds to Stop Robot
-			M0PWM0_Duty(3);
-			M0PWM1_Duty_new(3);
+			M0PWM6_Duty(3);
+			M0PWM7_Duty(3);
 			GPIO_PORTF_DATA_R = 0x02;
-			Delay2();
-			dropOffMovement();
+		//	Delay2();
+		//	dropOffMovement();
 			
 		}
+		
 		
 		/*
 		// Execute Drop Off Movement if Ball count is max
@@ -242,16 +223,16 @@ int main(void){
 					// Ensure robot moves forward
 					GPIO_PORTD_DATA_R = 0x14;
 					
-					M0PWM0_Duty(5000);
-					M0PWM1_Duty_new(5000);
+					M0PWM6_Duty(5000);
+					M0PWM7_Duty(5000);
 				}
 				else if (dFinalDistance < 6) {
 					
 					// Reverse the Car
 					GPIO_PORTD_DATA_R = 0x28;
 					
-					M0PWM0_Duty(5000);
-					M0PWM1_Duty_new(5000);
+					M0PWM6_Duty(5000);
+					M0PWM7_Duty(5000);
 				}
 				else if (dFinalDistance == 6) {
 					
@@ -268,8 +249,8 @@ int main(void){
 				else {
 					
 					GPIO_PORTF_DATA_R = 0x08;
-					M0PWM0_Duty(3);
-					M0PWM1_Duty_new(3);
+					M0PWM6_Duty(3);
+					M0PWM7_Duty(3);
 				}
 			}
 		}
@@ -286,8 +267,8 @@ int main(void){
 		else {
 		
 			// Update Speeds
-			M0PWM0_Duty(3);
-			M0PWM1_Duty_new(3);
+			M0PWM6_Duty(3);
+			M0PWM7_Duty(3);
 			
 			GPIO_PORTF_DATA_R = 0x02;
 			
@@ -299,8 +280,8 @@ int main(void){
 				
 				GPIO_PORTD_DATA_R = 0x14;
 				
-				M0PWM0_Duty(5000);
-				M0PWM1_Duty_new(5000);
+				M0PWM6_Duty(5000);
+				M0PWM7_Duty(5000);
 			}
 			else if (finalDistance < 6) {
 				
@@ -308,12 +289,12 @@ int main(void){
 				
 				GPIO_PORTD_DATA_R = 0x28;
 				
-				M0PWM0_Duty(5000);
-				M0PWM1_Duty_new(5000);
+				M0PWM6_Duty(5000);
+				M0PWM7_Duty(5000);
 			}
 			else if (finalDistance == 6) {
-				M0PWM0_Duty(3);
-				M0PWM1_Duty_new(3);
+				M0PWM6_Duty(3);
+				M0PWM7_Duty(3);
 				
 				// Execute Arm Pick Up Motion
 				// pickUpValue = armPickUpLocation(finalXCoordinateValue);
@@ -323,8 +304,8 @@ int main(void){
 			}
 			else {
 				GPIO_PORTF_DATA_R = 0x08;
-				M0PWM0_Duty(3);
-				M0PWM1_Duty_new(3);
+				M0PWM6_Duty(3);
+				M0PWM7_Duty(3);
 			}
 		}
 		*/
@@ -388,6 +369,6 @@ void motorPIDcontrol(float motorPIDOutput) {
 	Nokia5110_OutUDec(rightPWMSpeed);
 	
 	// Update Speeds
-	M0PWM0_Duty(leftPWMSpeed);
-	M0PWM1_Duty_new(rightPWMSpeed);
+	M0PWM6_Duty(leftPWMSpeed);
+	M0PWM7_Duty(rightPWMSpeed);
 }
