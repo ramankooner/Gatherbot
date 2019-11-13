@@ -23,3 +23,6 @@ void armMovement(int pickUpCoord);
 
 // Executes a 180 turn so robot will reverse onto drop off location
 void dropOffMovement(void);
+
+// Adjust the robot for prefered distance
+void adjustRobot(int current, int final);

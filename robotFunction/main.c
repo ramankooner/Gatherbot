@@ -200,6 +200,8 @@ int main(void){
 			M0PWM6_Duty(3);
 			M0PWM7_Duty(3);
 			GPIO_PORTF_DATA_R = 0x02;
+			
+		//  adjustRobot(finalDistance, 16);  
 		//	Delay2();
 		//	dropOffMovement();
 			

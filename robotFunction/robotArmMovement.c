@@ -154,6 +154,29 @@ void dropOffMovement(void) {
 	}
 }
 
+void adjustRobot(int current, int final) {
+	
+	while (current != final) {
+		
+		if (current < final) {
+			GPIO_PORTB_DATA_R = 0x0A;
+			M0PWM6_Duty(4000);
+			M0PWM7_Duty(4000);
+		}
+		else if (current > final) {
+			GPIO_PORTB_DATA_R = 0x05;
+			M0PWM6_Duty(4000);
+			M0PWM7_Duty(4000);
+		}
+		else {
+			GPIO_PORTB_DATA_R = 0x0A;
+			M0PWM6_Duty(3);
+			M0PWM7_Duty(3);
+			break;
+		}
+	}
+}
+
 /*
 void oldPickUp(void) {
 	Delay2();
