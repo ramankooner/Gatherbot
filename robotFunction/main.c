@@ -22,7 +22,7 @@
 #define Kd 45
 
 // Drop Off PID Control
-#define dKp 0
+#define dKp 2300
 #define dKi 0
 #define dKd 0
 
@@ -31,24 +31,29 @@ void EnableInterrupts(void);
 
 // PID Loop for Centering a Ball
 float controlLoop(float setPoint, float processVariable);
+float controllerLoop(float setPoint, float processVariable);
 void motorPIDcontrol(float motorPIDOutput);
+void distancePIDcontrol(float distanceOut);
 
 // PID Loop for Drop Off Location
 float dropOffControlLoop(float dSP, float dPV);
 void dropOffControl(float dOutput);
 	
 unsigned char n;
-int i,k;
+int i,k,j;
 
 // ARM Variables
 float pickUpValue;
 int xValue;
+int pickUpFlag;
 
 // UART Variables
 int uartFlag;
-char buffer[8];
+char buffer[11];
+char distanceBuffer[10];
 int check_value, check_sum;
 int finalXCoordinateValue, finalYCoordinateValue;
+int dFinalX, dFinalDistance;
 int finalDistance;
 int dFinalDistance;
 int checkDisplay;
@@ -56,7 +61,7 @@ int checkDisplay;
 // Motor Control
 int leftPWMSpeed;
 int rightPWMSpeed;
-float motorSpeed; 
+float motorSpeed, distanceSpeed; 
 
 // Drop Off Control
 int dLeftPWMSpeed;
@@ -119,11 +124,14 @@ int main(void){
 	
 	// UART Flag
 	uartFlag = 1;
+	pickUpFlag = 0;
+	
 	
 	while(1) {
 		
 		// UART COMMUNICATION
 		if (uartFlag == 1) {
+			GPIO_PORTB_DATA_R = 0x0A;
 			n = UART_InChar();
 			
 			if (n == 0x41) { //Start of Package
@@ -134,12 +142,12 @@ int main(void){
 					buffer[i] = n;
 				}
 				
-				// Check for data corruption
-				check_value = buffer[0] + buffer[1] + buffer[2] + buffer[3] + buffer[4] + buffer[5] + buffer[6];
+				// Check for corruption
+				check_value = buffer[0] + buffer[1] + buffer[2] + buffer[3] + buffer[4] + buffer[5] + buffer[6]+ buffer[7] + buffer[8] + buffer[9];
 				check_sum = check_value & 0x7F;
-				if(check_sum == buffer[7]) {
+				if(check_sum == buffer[10]) {
 					// Display the check sum from PI as a decimal
-					checkDisplay = (int) buffer[7];
+					checkDisplay = (int) buffer[10];
 					
 					// Convert the X and Y coordinates to Decimal numbers
 					finalXCoordinateValue = charToDecimal(buffer[2], buffer[3]);
@@ -147,6 +155,11 @@ int main(void){
 					
 					// Convert Distance to Decimal Number
 					finalDistance = singleCharToDecimal(buffer[6]);
+					
+					// Drop Off
+					dFinalX = charToDecimal(buffer[7],buffer[8]);
+					dFinalDistance = singleCharToDecimal(buffer[9]);
+				
 				}
 				else {
 					uartFlag = 0;
@@ -170,15 +183,40 @@ int main(void){
 			uartFlag = 1;
 		}
 		
-		/*
-		// DISPLAY BUFFER ON LCD
-		Nokia5110_SetCursor(3,0);
-		Nokia5110_OutUDec(buffer[0]);
+	
+		if (pickUpFlag == 1) {
+			// Executes the Pick Up movement 
+			GPIO_PORTF_DATA_R = 0x0C;
+			
+			pickUpValue = armPickUpLocation(finalXCoordinateValue);
+			pickUp(pickUpValue);
+			GPIO_PORTF_DATA_R = 0x02;
+			pickUpFlag = 0;
+			uartFlag = 0;
+		}
+
+		// FIND DROP OFF BOX
+		if (finalDistance > 20) {
+			motorSpeed = controlLoop(80, finalXCoordinateValue);
+			motorPIDcontrol(motorSpeed);
+			GPIO_PORTF_DATA_R = 0x08;
+			
+		}
+		else if ( finalDistance <= 20) {
+			GPIO_PORTF_DATA_R = 0x04;
+			distanceSpeed = controllerLoop(16, finalDistance);
+			
+			if (distanceSpeed == 0) {
+				pickUpFlag = 1;
+			}
+			
+			distancePIDcontrol(distanceSpeed + 2);
+		}
 		
-		Nokia5110_SetCursor(3,1);
-		Nokia5110_OutUDec(buffer[1]);
-		*/
-		
+		else {
+			M0PWM6_Duty(3);
+			M0PWM7_Duty(3);
+		}
 		
 		// START BYTE
 		Nokia5110_SetCursor(3,2);
@@ -189,24 +227,7 @@ int main(void){
 		Nokia5110_OutUDec(checkDisplay); 
 		
 		
-		// FIND DROP OFF BOX
-		if (finalDistance > 20) {
-			motorSpeed = controlLoop(80, finalXCoordinateValue);
-			motorPIDcontrol(motorSpeed);
-			GPIO_PORTF_DATA_R = 0x08;
-		}
-		else {
-			// Update Speeds to Stop Robot
-			M0PWM6_Duty(3);
-			M0PWM7_Duty(3);
-			GPIO_PORTF_DATA_R = 0x02;
-			
-		//  adjustRobot(finalDistance, 16);  
-		//	Delay2();
-		//	dropOffMovement();
-			
-		}
-		
+		//-------------------------------------------------------------------
 		
 		/*
 		// Execute Drop Off Movement if Ball count is max
@@ -215,7 +236,7 @@ int main(void){
 			
 			// If drop off location is found then execute PID Loop on it
 			if (dFinalDistance > 12) {
-				dMotorSpeed = controlLoop(300, finalXCoordinateValue, dKp, dKi, dKd);
+				dMotorSpeed = controlLoop(300, dFinalX, dKp, dKi, dKd);
 				motorPIDcontrol(dMotorSpeed);
 			}
 			else {
@@ -342,6 +363,41 @@ float controlLoop(float setPoint, float processVariable) {
 	
 	return outputControl;
 	
+}
+
+float controllerLoop(float setPoint, float processVariable) {
+	
+	float error;
+	float outputControl;
+	
+	error = setPoint - processVariable;
+
+	// Output
+	// Output should be a ratio of the two PWMs
+	outputControl = (error * dKp);
+
+	return outputControl;
+	
+}
+
+void distancePIDcontrol(float distanceOut) {
+	float leftSpeed, rightSpeed;
+	
+	if (distanceOut < 0) {
+		distanceOut = distanceOut * (-1);
+		GPIO_PORTB_DATA_R = 0x0A;
+	}
+	else {
+		distanceOut = distanceOut;
+		GPIO_PORTB_DATA_R = 0x05;
+	}
+	
+	leftSpeed = floor(distanceOut);
+	rightSpeed = floor(distanceOut);
+	
+	// Update Speeds
+	M0PWM6_Duty(leftSpeed);
+	M0PWM7_Duty(rightSpeed);
 }
 
 void motorPIDcontrol(float motorPIDOutput) {
