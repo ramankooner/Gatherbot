@@ -148,10 +148,10 @@ void dropOffMovement(void) {
 		Delay2();
 		GPIO_PORTF_DATA_R = 0x04;
 	}
-	while(1){
-		M0PWM6_Duty(3);
-		M0PWM7_Duty(3);
-	}
+	
+	// open the gate
+	// wait 10 seconds
+	// close the gate
 }
 
 int adjustRobot(int current, int final) {

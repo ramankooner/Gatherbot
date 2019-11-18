@@ -1,5 +1,143 @@
 	// PROJECT COMMENTS
 	
+	DROP OFF MOVEMENT CODE 
+	
+	/*
+		// Execute Drop Off Movement if Ball count is max
+		if (ballCount == 5) {
+			// Need to implement a searching algorithm
+			
+			// If drop off location is found then execute PID Loop on it
+			if (dFinalDistance > 12) {
+				dMotorSpeed = controlLoop(300, dFinalX, dKp, dKi, dKd);
+				motorPIDcontrol(dMotorSpeed);
+			}
+			else {
+				// Change this value to whatever value we need
+				if (dFinalDistance > 8) {
+				
+					// Ensure robot moves forward
+					GPIO_PORTD_DATA_R = 0x14;
+					
+					M0PWM6_Duty(5000);
+					M0PWM7_Duty(5000);
+				}
+				else if (dFinalDistance < 6) {
+					
+					// Reverse the Car
+					GPIO_PORTD_DATA_R = 0x28;
+					
+					M0PWM6_Duty(5000);
+					M0PWM7_Duty(5000);
+				}
+				else if (dFinalDistance == 6) {
+					
+					// Execute the Drop Off Movement (Turn Around, Empty Out, Close)
+					dropOffMovement();
+					
+					//Delay2();
+					
+					// Reset the Ball Count
+					//ballCount = 0;
+					
+					// Start Searching for new Ping Pong Balls
+				}
+				else {
+					
+					GPIO_PORTF_DATA_R = 0x08;
+					M0PWM6_Duty(3);
+					M0PWM7_Duty(3);
+				}
+			}
+		}
+		*/
+		
+		/*
+		// PICKING UP BALLS
+		// Execute PID Loop if a ball is in view of the camera
+		if (finalDistance > 12) {
+			motorSpeed = controlLoop(300, finalXCoordinateValue, Kp, Ki, Kd);
+			motorPIDcontrol(motorSpeed);
+		}
+		
+		else {
+		
+			// Update Speeds
+			M0PWM6_Duty(3);
+			M0PWM7_Duty(3);
+			
+			GPIO_PORTF_DATA_R = 0x02;
+			
+			Delay2();
+			
+			if (finalDistance > 6) {
+				
+				// Ensure robot moves forward
+				
+				GPIO_PORTD_DATA_R = 0x14;
+				
+				M0PWM6_Duty(5000);
+				M0PWM7_Duty(5000);
+			}
+			else if (finalDistance < 6) {
+				
+				// Reverse the Car
+				
+				GPIO_PORTD_DATA_R = 0x28;
+				
+				M0PWM6_Duty(5000);
+				M0PWM7_Duty(5000);
+			}
+			else if (finalDistance == 6) {
+				M0PWM6_Duty(3);
+				M0PWM7_Duty(3);
+				
+				// Execute Arm Pick Up Motion
+				// pickUpValue = armPickUpLocation(finalXCoordinateValue);
+				// armMovement(pickUpValue);
+				// Delay2();
+				// ballCount++;
+			}
+			else {
+				GPIO_PORTF_DATA_R = 0x08;
+				M0PWM6_Duty(3);
+				M0PWM7_Duty(3);
+			}
+		}
+		*/
+		
+		/*
+		if (pickUpFlag == 1) {
+			// Executes the Pick Up movement 
+			GPIO_PORTF_DATA_R = 0x0C;
+			
+			pickUpValue = armPickUpLocation(finalXCoordinateValue);
+			armMovement(pickUpValue);
+			GPIO_PORTF_DATA_R = 0x02;
+			pickUpFlag = 0;
+			uartFlag = 0;
+		}
+		*/
+		
+		/*
+		else if ( finalDistance <= 20) {
+			GPIO_PORTF_DATA_R = 0x04;
+			distanceSpeed = controllerLoop(17, finalDistance);
+			
+			if (distanceSpeed == 0) {
+				pickUpFlag = 1;
+			}
+			
+			distancePIDcontrol(distanceSpeed + 2);
+		}
+		
+		else {
+			M0PWM6_Duty(3);
+			M0PWM7_Duty(3);
+		}
+		*/
+	
+------------------------------------------------------------------------------------------------------------------------------------------------------------
 	NOTES:
 	
 	PA7 - PA7 is being used as a port for the LCD and a PWM. Change the PWM signal from PA7 to ____
@@ -87,5 +225,75 @@
 	//M0PWM1_Init_new(15625, 1100); // Joint 3 -
 	//M0PWM0_Init(15625, 250); // Joint 1 - Max: 1500 Min: 250
 	
+--------------------------------------------------------------------------------------------------------------------------------------------------------------	
+ERIC's PID CODE
+
+//PID Example, this is the bare minimum to implement PID safely and correctly
+//  It's also not a bad idea to scale all values to be a float bound within 0 to 1
+//  example: 8-bit sensor input and 8-bit PWM output
+//	Feedback from Sensor = 0 to 255, Output to PWM = 0 to 255, and Setpoint = 128 (50% of max) 
+//  Everytime a new Sensor Value is Received:
+//		PWMvalue = PID(float(128/255),NewSensorValue()/255) * 255;
+//			To Operate Correctly, The Arguments Must Never Be Below 0 or Above 1
+
+//These Coefficients need to be tuned/adjusted for the desired response of the system
+#define Kp 0.40 /* Coefficient of Proportional (Values 0 to 1)*/
+#define Ki 0.10 /* Coefficient of Integral (Values 0 to 1)*/
+#define Kd 0.01 /* Coefficient of Derivative (Values 0 to 1)*/
+
+//SP = SetPoint, the desired operating point, i.e. Position/Velocity/etc...
+//PV = ProcessVariable, the feedback from the Plant/System, i.e. DistanceSensor/RPMs/etc...
+//MV = ManipulatedVariable, the new value to drive the Plant/System, i.e. PWM value for motor/etc...
+
+float PID(float SP, float PV)
+{
+	float Error, MV, Derivative;
+	static float prevError, Integral, prevIntegral;
 	
+	SP = 0;					//Get Setpoint
+	PV = feedBack(void);	//Get Process Variable
+	
+	//Calculate Error
+	Error = SP - PV;
+	
+	prevError = Error; //Save a copy for Derivative Calculation
+	
+	//Calculate Integral Term, we also need to make sure the Integral does not overflow
+	//	and if it does overflow we need to disregard that result and use the old value
+	prevIntegral = Integral;	//Save a copy of the Integral before we calculate a new one
+	//Calculate the new Integral Term, Apply Ki here so we can accumulate more times without overflowing
+	Integral = Integral + (Error * Ki);
+	//Check if the Integral Calculation Resulted in an Overflow
+	if((prevIntegral > 0) && (Error > 0) && (Integral < 0)) //Check if the result had a sign change
+		Integral = prevIntegral;	//Overflow Occurred, restore previously calculated integral
+	if((prevIntegral < 0) && (Error < 0) && (Integral > 0)) //Check if the result had a sign change
+		Integral = prevIntegral;	//Overflow Occurred, restore previously calculated integral
+	//Since this PID loop is designed to operate between 0 and 1, we can also keep I from windup problems
+	//  by checking it and clamping it -1 or 1
+	if(Integral > 1) Integral = 1;
+	if(Integral < -1) Integral = -1;
+	
+	//Calculate Derivative Term
+	Derivative = Error - prevError;
+	
+	//Calculate Manipulated Variable, only one of these should be used
+	//P Controller - P only: Rarely Used
+	MV = Error * Kp;
+	//PI Controller - PI Only: Most Common
+	MV = (Error * Kp) + Integral;
+	//PID Controller - PID: Common, but be careful as D can add a lot of noise/jitter - Kd should be kept small
+	MV = (Error * Kp) + Integral + (Derivative * Kd);
+	
+	//Add a Bias
+	MV = MV + 0.5;
+	
+	//Lets also make sure MV never falls outside 0 and 1
+	if(MV > 1) MV = 1;
+	if(MV < 0) MV = 0;
+	
+	return MV;
+}
+
+
+
 --------------------------------------------------------------------------------------------------------------------------------------------------------------	
