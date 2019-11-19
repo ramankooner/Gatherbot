@@ -72,11 +72,14 @@ float dMotorSpeed;
 int ballCount;
 
 enum state {
+	//SEARCH_BALL,
+	//APPROACH_BALL,
 	STOP_CAR,
 	ADJUST_DISTANCE,
 	STOP_CAR2,
 	GET_DISTANCE,
-	PICK_UP
+	PICK_UP,
+	CHECK_COUNT
 } state;
 	
 int main(void){
@@ -135,7 +138,7 @@ int main(void){
 	// UART Flag
 	uartFlag = 1;
 	pickUpFlag = 0;
-	
+	ballCount = 0;
 	
 	while(1) {
 		
@@ -144,7 +147,7 @@ int main(void){
 			GPIO_PORTB_DATA_R = 0x0A;
 			n = UART_InChar();
 			
-			//PACKAGE: START | COMMAND | XCOORD1 | XCOORD0 | YCOORD1 | YCOORD0 | BALL DISTANCE | DROPOFF X1 | DROPOFF X0 | CHECK SUM
+			//PACKAGE: START | COMMAND | XCOORD1 | XCOORD0 | YCOORD1 | YCOORD0 | BALL DISTANCE | DROPOFF X1 | DROPOFF X0 | DROPOFF DISTANCE | CHECK SUM
 			if (n == 0x41) { //Start of Package
 				buffer[0] = n;
 				
@@ -205,29 +208,65 @@ int main(void){
 		Nokia5110_SetCursor(3,5);
 		Nokia5110_OutUDec(command);
 		
-		/*
-		if (pickUpFlag == 1) {
-			// Executes the Pick Up movement 
-			GPIO_PORTF_DATA_R = 0x0C;
-			
-			pickUpValue = armPickUpLocation(finalXCoordinateValue);
-			armMovement(pickUpValue);
-			GPIO_PORTF_DATA_R = 0x02;
-			pickUpFlag = 0;
-			uartFlag = 0;
-		}
-		*/
-		
 		// FIND DROP OFF
+		
+		
 		if (finalDistance > 30) {
 			motorSpeed = controlLoop(80, finalXCoordinateValue);
 			motorPIDcontrol(motorSpeed);
 			GPIO_PORTF_DATA_R = 0x08;
-			
 		}
 		else { 
 			switch(state) {
+				/*
+				case SEARCH_BALL:
 				
+					// searching algorithm
+					if (buffer[1] == 0x41) {
+						M0PWM6_Duty(3);
+						M0PWM7_Duty(3);
+						state = APPROACH_BALL;
+					}
+					else{
+						GPIO_PORTB_DATA_R = 0x0A; //Forward Direction
+						
+						// TEMP - SEARCH IN PLACE
+						// Slow Pivot
+						M0PWM3_DUTY(3);
+						M0PW3_DUTY(7000);
+						count++;
+						
+						if ( count == 60) {
+							M0PWM6_Duty(3);
+							M0PWM7_Duty(3);
+							
+							// move forward
+							for(i = 0; i < 30; i++) {
+								M0PMW6_Duty(6000);
+								M0PWM7_Duty(6000);
+							}
+							// object avoidance code
+						}
+					}
+					break;
+				
+				case APPROACH_BALL:
+				
+					if (buffer[1] == 0x41) {
+						motorSpeed = controlLoop(80, finalXCoordinateValue);
+						motorPIDcontrol(motorSpeed);
+						GPIO_PORTF_DATA_R = 0x08;
+						
+						if (finalDistance < 20) {
+							state = STOP_CAR;
+						}
+					}
+					
+					else {
+						state = SEARCH_BALL;
+					}
+					break;
+				*/
 				case STOP_CAR:
 					GPIO_PORTF_DATA_R = 0x0A;
 					M0PWM6_Duty(3);
@@ -238,7 +277,7 @@ int main(void){
 					
 					state = ADJUST_DISTANCE;
 					
-					break; //
+					break; 
 					
 				case ADJUST_DISTANCE:
 					GPIO_PORTF_DATA_R = 0x04;
@@ -282,139 +321,70 @@ int main(void){
 					pickUpValue = armPickUpLocation(finalXCoordinateValue);
 					armMovement(pickUpValue);
 					
+					ballCount++;
+					state = CHECK_COUNT;
+				
 					break;
-			}
-		}
-		
-		/*
-		else if ( finalDistance <= 20) {
-			GPIO_PORTF_DATA_R = 0x04;
-			distanceSpeed = controllerLoop(17, finalDistance);
-			
-			if (distanceSpeed == 0) {
-				pickUpFlag = 1;
-			}
-			
-			distancePIDcontrol(distanceSpeed + 2);
-		}
-		
-		else {
-			M0PWM6_Duty(3);
-			M0PWM7_Duty(3);
-		}
-		*/
-		
-		
-		
-		
-		//-------------------------------------------------------------------
-		
-		/*
-		// Execute Drop Off Movement if Ball count is max
-		if (ballCount == 5) {
-			// Need to implement a searching algorithm
-			
-			// If drop off location is found then execute PID Loop on it
-			if (dFinalDistance > 12) {
-				dMotorSpeed = controlLoop(300, dFinalX, dKp, dKi, dKd);
-				motorPIDcontrol(dMotorSpeed);
-			}
-			else {
-				// Change this value to whatever value we need
-				if (dFinalDistance > 8) {
 				
-					// Ensure robot moves forward
-					GPIO_PORTD_DATA_R = 0x14;
+				case CHECK_COUNT:
+					if(ballCount == 2){
+						//state = SEARCH_DROPOFF;
+					}
+					else {
+						//state = BALL_SEARCH;
+					}
+					break;
 					
+				/*
+				case SEARCH_DROPOFF:
+					if (buffer[1] == 0x43) {
+						// drop off in view
+						state = APPROACH_DROPOFF;
+					}
+					else {
+						// KEEP SEARCHING
+					}
+					break;
+					
+				case APPROACH_DROPOFF:
+					
+					// PID ON DROP OFF
+					
+					
+					if (dFinalDistance < 20) {
+						// drop off movement
+						//dropOffMovement();
+						ballCount = 0;
+						state = MOVE_FORWARD;
+					}
+					
+					break;
+					
+				case MOVE_FORWARD:
+				
 					M0PWM6_Duty(5000);
 					M0PWM7_Duty(5000);
-				}
-				else if (dFinalDistance < 6) {
+					for(i = 0; i < 10; i++) {
+						Delay3();
+					}
 					
-					// Reverse the Car
-					GPIO_PORTD_DATA_R = 0x28;
-					
-					M0PWM6_Duty(5000);
-					M0PWM7_Duty(5000);
-				}
-				else if (dFinalDistance == 6) {
-					
-					// Execute the Drop Off Movement (Turn Around, Empty Out, Close)
-					dropOffMovement();
-					
-					//Delay2();
-					
-					// Reset the Ball Count
-					//ballCount = 0;
-					
-					// Start Searching for new Ping Pong Balls
-				}
-				else {
-					
-					GPIO_PORTF_DATA_R = 0x08;
-					M0PWM6_Duty(3);
-					M0PWM7_Duty(3);
-				}
+					state = SEARCH_BALL;
+					break;
+				*/
 			}
-		}
-		*/
-		
-		/*
-		// PICKING UP BALLS
-		// Execute PID Loop if a ball is in view of the camera
-		if (finalDistance > 12) {
-			motorSpeed = controlLoop(300, finalXCoordinateValue, Kp, Ki, Kd);
-			motorPIDcontrol(motorSpeed);
-		}
-		
-		else {
-		
-			// Update Speeds
-			M0PWM6_Duty(3);
-			M0PWM7_Duty(3);
-			
-			GPIO_PORTF_DATA_R = 0x02;
-			
-			Delay2();
-			
-			if (finalDistance > 6) {
-				
-				// Ensure robot moves forward
-				
-				GPIO_PORTD_DATA_R = 0x14;
-				
-				M0PWM6_Duty(5000);
-				M0PWM7_Duty(5000);
-			}
-			else if (finalDistance < 6) {
-				
-				// Reverse the Car
-				
-				GPIO_PORTD_DATA_R = 0x28;
-				
-				M0PWM6_Duty(5000);
-				M0PWM7_Duty(5000);
-			}
-			else if (finalDistance == 6) {
-				M0PWM6_Duty(3);
-				M0PWM7_Duty(3);
-				
-				// Execute Arm Pick Up Motion
-				// pickUpValue = armPickUpLocation(finalXCoordinateValue);
-				// armMovement(pickUpValue);
-				// Delay2();
-				// ballCount++;
-			}
-			else {
-				GPIO_PORTF_DATA_R = 0x08;
-				M0PWM6_Duty(3);
-				M0PWM7_Duty(3);
-			}
-		}
-		*/
-		
+		}	
 	}
 }
+
+/*
+PID Notes from Eric:
+
+Camera Feedback for Process Variable: 0 to 160.
+Desired Set Point: 80
+Process Variable is data read from UART
+
+*/
+
 
 // PID CONTROL FOR CENTERING BALL
 float controlLoop(float setPoint, float processVariable) {
@@ -497,9 +467,9 @@ void distancePIDcontrol(float distanceOut) {
 	rightSpeed = floor(distanceOut);
 	
 	if(leftSpeed < 0) leftSpeed = 2;
-	else if (leftSpeed > 15000) leftSpeed = 15000;
+	else if (leftSpeed > 15000) leftSpeed = 8000;
 	if(rightSpeed < 0) rightSpeed = 2;
-	else if (rightSpeed > 15000) rightSpeed = 15000;	
+	else if (rightSpeed > 15000) rightSpeed = 8000;	
 	
 	// DISPLAY SPEEDS ON LCD
 	Nokia5110_SetCursor(3,0);

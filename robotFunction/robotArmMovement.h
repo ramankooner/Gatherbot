@@ -26,3 +26,6 @@ void dropOffMovement(void);
 
 // Adjust the robot for prefered distance
 int adjustRobot(int current, int final);
+
+// Open the gate to release ping pong balls
+void openGate(void);
