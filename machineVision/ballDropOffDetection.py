@@ -138,20 +138,20 @@ check_sum = 0x00
 
 packet = bytearray()
 
-packet.append(START_BYTE)
-packet.append(COMMAND_BYTE)
+packet.append(START_BYTE) #0
+packet.append(COMMAND_BYTE) #1
 
-packet.append(X_CORD1)
-packet.append(X_CORD0)
-packet.append(Y_CORD1)
-packet.append(Y_CORD0)
-packet.append(DISTANCE)
+packet.append(X_CORD1) #2
+packet.append(X_CORD0) #3
+packet.append(Y_CORD1) #4
+packet.append(Y_CORD0) #5
+packet.append(DISTANCE) #6
 
-packet.append(dX_CORD1)
-packet.append(dX_CORD0)
-packet.append(dDISTANCE)
+packet.append(dX_CORD1) #7
+packet.append(dX_CORD0) #8
+packet.append(dDISTANCE) #9
 
-packet.append(check_sum)
+packet.append(check_sum) #10
 
 count = 0
 

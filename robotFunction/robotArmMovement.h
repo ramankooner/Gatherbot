@@ -25,4 +25,4 @@ void armMovement(int pickUpCoord);
 void dropOffMovement(void);
 
 // Adjust the robot for prefered distance
-void adjustRobot(int current, int final);
+int adjustRobot(int current, int final);

@@ -97,7 +97,7 @@ void pickUp(int pickUpValue){
 	Delay2();
 	
 	// PICK UP THE BALL
-	GPIO_PORTF_DATA_R = 0x02;
+	//GPIO_PORTF_DATA_R = 0x02;
 	M0PWM2_Init(15625, 560); //Grab  PA7
 	
 	// GET ARM READY FOR DROP OFF
@@ -154,27 +154,28 @@ void dropOffMovement(void) {
 	}
 }
 
-void adjustRobot(int current, int final) {
-	
-	while (current != final) {
-		
-		if (current < final) {
+int adjustRobot(int current, int final) {
+		int adjustFlag;
+		if (current > final) {
 			GPIO_PORTB_DATA_R = 0x0A;
-			M0PWM6_Duty(4000);
-			M0PWM7_Duty(4000);
+			M0PWM6_Duty(5000);
+			M0PWM7_Duty(5000);
+			adjustFlag = 1;
 		}
-		else if (current > final) {
+		else if (current < final) {
 			GPIO_PORTB_DATA_R = 0x05;
-			M0PWM6_Duty(4000);
-			M0PWM7_Duty(4000);
-		}
+			M0PWM6_Duty(5000);
+			M0PWM7_Duty(5000);
+			adjustFlag = 1;
+  	}
 		else {
 			GPIO_PORTB_DATA_R = 0x0A;
 			M0PWM6_Duty(3);
 			M0PWM7_Duty(3);
-			break;
+			adjustFlag = 0;
+			Delay3();
 		}
-	}
+		return adjustFlag;
 }
 
 /*

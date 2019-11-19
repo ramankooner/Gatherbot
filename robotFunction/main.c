@@ -22,7 +22,7 @@
 #define Kd 45
 
 // Drop Off PID Control
-#define dKp 0
+#define dKp 3000
 #define dKi 0
 #define dKd 0
 
@@ -31,38 +31,53 @@ void EnableInterrupts(void);
 
 // PID Loop for Centering a Ball
 float controlLoop(float setPoint, float processVariable);
+float controllerLoop(float setPoint, float processVariable);
 void motorPIDcontrol(float motorPIDOutput);
+void distancePIDcontrol(float distanceOut);
 
 // PID Loop for Drop Off Location
 float dropOffControlLoop(float dSP, float dPV);
 void dropOffControl(float dOutput);
 	
 unsigned char n;
-int i,k;
+int i,k,j,g;
 
 // ARM Variables
 float pickUpValue;
 int xValue;
+int pickUpFlag;
+float leftSpeed, rightSpeed;
 
 // UART Variables
 int uartFlag;
-char buffer[8];
+char buffer[11];
+char distanceBuffer[10];
 int check_value, check_sum;
 int finalXCoordinateValue, finalYCoordinateValue;
+int dFinalX, dFinalDistance;
 int finalDistance;
 int dFinalDistance;
 int checkDisplay;
+int command;
 
 // Motor Control
 int leftPWMSpeed;
 int rightPWMSpeed;
-float motorSpeed; 
+float motorSpeed, distanceSpeed; 
 
 // Drop Off Control
 int dLeftPWMSpeed;
 int dRightPWMSpeed;
 float dMotorSpeed;
 int ballCount;
+
+enum state {
+	STOP_CAR,
+	ADJUST_DISTANCE,
+	STOP_CAR2,
+	GET_DISTANCE,
+	PICK_UP
+} state;
 	
 int main(void){
 	
@@ -77,7 +92,7 @@ int main(void){
 	
 	ballCount = 0;
 	
-	/*
+	
 	// ARM MOVEMENT
 	// Initialize Arm
 	M0PWM3_Init(15625, 720);      // PB5 - To Center
@@ -90,13 +105,13 @@ int main(void){
 	
 	// EXECUTE ROBOTIC ARM MOVEMENT 
 	// X-coordinate value - TESTING
-	xValue = 80;
+	//xValue = 80;
 	
 	// Executes the Pick Up movement only - TESTING
-	pickUpValue = armPickUpLocation(xValue);
+	//pickUpValue = armPickUpLocation(xValue);
 	
-	pickUp(pickUpValue);
-	*/
+	//pickUp(pickUpValue);
+	
 	
 	// MOTOR CONTROL
 	
@@ -119,13 +134,17 @@ int main(void){
 	
 	// UART Flag
 	uartFlag = 1;
+	pickUpFlag = 0;
+	
 	
 	while(1) {
 		
 		// UART COMMUNICATION
 		if (uartFlag == 1) {
+			GPIO_PORTB_DATA_R = 0x0A;
 			n = UART_InChar();
 			
+			//PACKAGE: START | COMMAND | XCOORD1 | XCOORD0 | YCOORD1 | YCOORD0 | BALL DISTANCE | DROPOFF X1 | DROPOFF X0 | CHECK SUM
 			if (n == 0x41) { //Start of Package
 				buffer[0] = n;
 				
@@ -134,12 +153,13 @@ int main(void){
 					buffer[i] = n;
 				}
 				
-				// Check for data corruption
-				check_value = buffer[0] + buffer[1] + buffer[2] + buffer[3] + buffer[4] + buffer[5] + buffer[6];
+				// Check for corruption
+				check_value = buffer[0] + buffer[1] + buffer[2] + buffer[3] + buffer[4] + buffer[5] + buffer[6]+ buffer[7] + buffer[8] + buffer[9];
 				check_sum = check_value & 0x7F;
-				if(check_sum == buffer[7]) {
+				if(check_sum == buffer[10]) {
 					// Display the check sum from PI as a decimal
-					checkDisplay = (int) buffer[7];
+					checkDisplay = (int) buffer[10];
+					command = (int) buffer[1];
 					
 					// Convert the X and Y coordinates to Decimal numbers
 					finalXCoordinateValue = charToDecimal(buffer[2], buffer[3]);
@@ -147,6 +167,11 @@ int main(void){
 					
 					// Convert Distance to Decimal Number
 					finalDistance = singleCharToDecimal(buffer[6]);
+					
+					// Drop Off
+					dFinalX = charToDecimal(buffer[7],buffer[8]);
+					dFinalDistance = singleCharToDecimal(buffer[9]);
+				
 				}
 				else {
 					uartFlag = 0;
@@ -170,16 +195,6 @@ int main(void){
 			uartFlag = 1;
 		}
 		
-		/*
-		// DISPLAY BUFFER ON LCD
-		Nokia5110_SetCursor(3,0);
-		Nokia5110_OutUDec(buffer[0]);
-		
-		Nokia5110_SetCursor(3,1);
-		Nokia5110_OutUDec(buffer[1]);
-		*/
-		
-		
 		// START BYTE
 		Nokia5110_SetCursor(3,2);
 		Nokia5110_OutUDec(finalXCoordinateValue);
@@ -187,26 +202,112 @@ int main(void){
 		Nokia5110_OutUDec(finalDistance);
 		Nokia5110_SetCursor(3,4);
 		Nokia5110_OutUDec(checkDisplay); 
+		Nokia5110_SetCursor(3,5);
+		Nokia5110_OutUDec(command);
 		
+		/*
+		if (pickUpFlag == 1) {
+			// Executes the Pick Up movement 
+			GPIO_PORTF_DATA_R = 0x0C;
+			
+			pickUpValue = armPickUpLocation(finalXCoordinateValue);
+			armMovement(pickUpValue);
+			GPIO_PORTF_DATA_R = 0x02;
+			pickUpFlag = 0;
+			uartFlag = 0;
+		}
+		*/
 		
-		// FIND DROP OFF BOX
-		if (finalDistance > 20) {
+		// FIND DROP OFF
+		if (finalDistance > 30) {
 			motorSpeed = controlLoop(80, finalXCoordinateValue);
 			motorPIDcontrol(motorSpeed);
 			GPIO_PORTF_DATA_R = 0x08;
+			
 		}
-		else {
-			// Update Speeds to Stop Robot
-			M0PWM6_Duty(3);
-			M0PWM7_Duty(3);
-			GPIO_PORTF_DATA_R = 0x02;
+		else { 
+			switch(state) {
+				
+				case STOP_CAR:
+					GPIO_PORTF_DATA_R = 0x0A;
+					M0PWM6_Duty(3);
+					M0PWM7_Duty(3);
+					for (g = 0; g < 3; g++) {
+						Delay2();
+					}
+					
+					state = ADJUST_DISTANCE;
+					
+					break; //
+					
+				case ADJUST_DISTANCE:
+					GPIO_PORTF_DATA_R = 0x04;
+					distanceSpeed = controllerLoop(17, finalDistance);
 			
-		//  adjustRobot(finalDistance, 16);  
-		//	Delay2();
-		//	dropOffMovement();
+					distancePIDcontrol(distanceSpeed + 2);
+					
+					if (finalDistance >=15 && finalDistance <= 17) {
+						state = STOP_CAR2;
+					} 
+					
+					break;
+				
+				case STOP_CAR2:
+					GPIO_PORTF_DATA_R = 0x02;
+					M0PWM6_Duty(3);
+					M0PWM7_Duty(3);
+					for (g = 0; g < 3; g++) {
+						Delay2();
+					}
+					
+					state = GET_DISTANCE;
+					
+					break;
+					
+				case GET_DISTANCE:
+					
+					if (finalDistance >=15 && finalDistance <= 17) {
+						state = PICK_UP;
+					}
+					else {
+						state = ADJUST_DISTANCE;
+					}
+					
+					break;
+				
+				case PICK_UP:
+					// Executes the Pick Up movement 
+					GPIO_PORTF_DATA_R = 0x0C;
 			
+					pickUpValue = armPickUpLocation(finalXCoordinateValue);
+					armMovement(pickUpValue);
+					
+					break;
+			}
 		}
 		
+		/*
+		else if ( finalDistance <= 20) {
+			GPIO_PORTF_DATA_R = 0x04;
+			distanceSpeed = controllerLoop(17, finalDistance);
+			
+			if (distanceSpeed == 0) {
+				pickUpFlag = 1;
+			}
+			
+			distancePIDcontrol(distanceSpeed + 2);
+		}
+		
+		else {
+			M0PWM6_Duty(3);
+			M0PWM7_Duty(3);
+		}
+		*/
+		
+		
+		
+		
+		//-------------------------------------------------------------------
 		
 		/*
 		// Execute Drop Off Movement if Ball count is max
@@ -215,7 +316,7 @@ int main(void){
 			
 			// If drop off location is found then execute PID Loop on it
 			if (dFinalDistance > 12) {
-				dMotorSpeed = controlLoop(300, finalXCoordinateValue, dKp, dKi, dKd);
+				dMotorSpeed = controlLoop(300, dFinalX, dKp, dKi, dKd);
 				motorPIDcontrol(dMotorSpeed);
 			}
 			else {
@@ -320,6 +421,7 @@ float controlLoop(float setPoint, float processVariable) {
 	
 	static float preError = 0;
 	static float integralControl = 0;
+	static float prevIntegral = 0;
 	float error;
 	float derivativeControl;
 	float outputControl;
@@ -327,21 +429,87 @@ float controlLoop(float setPoint, float processVariable) {
 	error = setPoint - processVariable;
 	
 	// Integral Control
-	integralControl = integralControl + error;
+	prevIntegral = integralControl;
+	integralControl = integralControl + error*Ki;
+	
+	// Overflow Check 
+	if((prevIntegral > 0) && (error > 0) && (integralControl < 0)){
+		integralControl = prevIntegral;
+	}
+  if((prevIntegral < 0) && (error < 0) && (integralControl > 0)){
+		integralControl = prevIntegral;
+	}
 	
 	// Derivative Control
 	derivativeControl = error - preError;
 	
 	// Output
 	// Output should be a ratio of the two PWMs
-	outputControl = (error * Kp) + (integralControl * Ki) + (derivativeControl * Kd);
+	outputControl = (error * Kp) + (integralControl) + (derivativeControl * Kd);
 	
 	preError = error;
-	if (error == 0) GPIO_PORTF_DATA_R = 0x0A;
-	else GPIO_PORTF_DATA_R = 0x04;
-	
+
 	return outputControl;
 	
+}
+
+float controllerLoop(float setPoint, float processVariable) {
+	
+	static float prevDError = 0;
+	static float prevProportional = 0;
+	static float proportionalControl = 0;
+	float derror;
+	float outputDControl;
+	
+	prevProportional = proportionalControl;
+	derror = setPoint - processVariable;
+	proportionalControl = derror * dKp;
+	
+	// Overflow Check 
+	if((prevDError > 0) && (derror > 0) && (prevProportional < 0)){
+		proportionalControl = prevProportional;
+	}
+  if((prevDError < 0) && (derror < 0) && (prevProportional > 0)){
+		proportionalControl = prevProportional;
+	}
+
+	// Output
+	// Output should be a ratio of the two PWMs
+	outputDControl = proportionalControl;
+
+	return outputDControl;
+	
+}
+
+void distancePIDcontrol(float distanceOut) {
+	
+	
+	if (distanceOut < 0) {
+		distanceOut = distanceOut * (-1);
+		GPIO_PORTB_DATA_R = 0x0A;
+	}
+	else {
+		distanceOut = distanceOut;
+		GPIO_PORTB_DATA_R = 0x05;
+	}
+	
+	leftSpeed = floor(distanceOut);
+	rightSpeed = floor(distanceOut);
+	
+	if(leftSpeed < 0) leftSpeed = 2;
+	else if (leftSpeed > 15000) leftSpeed = 15000;
+	if(rightSpeed < 0) rightSpeed = 2;
+	else if (rightSpeed > 15000) rightSpeed = 15000;	
+	
+	// DISPLAY SPEEDS ON LCD
+	Nokia5110_SetCursor(3,0);
+	Nokia5110_OutUDec(leftSpeed);
+	Nokia5110_SetCursor(3,1);
+	Nokia5110_OutUDec(rightSpeed);
+	
+	// Update Speeds
+	M0PWM6_Duty(leftSpeed);
+	M0PWM7_Duty(rightSpeed);
 }
 
 void motorPIDcontrol(float motorPIDOutput) {
@@ -363,14 +531,9 @@ void motorPIDcontrol(float motorPIDOutput) {
 	leftPWMSpeed = floor(leftMotorSpeed);
 	rightPWMSpeed = floor(rightMotorSpeed);
 	
-	// DISPLAY BUFFER ON LCD
-	Nokia5110_SetCursor(3,0);
-	Nokia5110_OutUDec(leftPWMSpeed);
-		
-	Nokia5110_SetCursor(3,1);
-	Nokia5110_OutUDec(rightPWMSpeed);
-	
 	// Update Speeds
 	M0PWM6_Duty(leftPWMSpeed);
 	M0PWM7_Duty(rightPWMSpeed);
 }
+
+
