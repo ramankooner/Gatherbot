@@ -1,5 +1,13 @@
 	// PROJECT COMMENTS
-	
+
+	1. ADJUST DISTANCE
+	2. DROP OFF COLOR 
+	3. SERVO MOTOR FOR BACK
+	4. CLASP 
+	5. FIX ARM SO IT DOESNT HIT CAMERA WHEN IT GOES UP ----- not sure if its because of power 
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
 	DROP OFF MOVEMENT CODE 
 	
 	/*

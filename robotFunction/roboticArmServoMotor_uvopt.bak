@@ -71,7 +71,7 @@
         <LExpSel>0</LExpSel>
       </OPTXL>
       <OPTFL>
-        <tvExp>1</tvExp>
+        <tvExp>0</tvExp>
         <tvExpOptDlg>0</tvExpOptDlg>
         <IsCurrentTarget>1</IsCurrentTarget>
       </OPTFL>
@@ -156,7 +156,7 @@
 
   <Group>
     <GroupName>Source</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -180,30 +180,24 @@
       <GroupNumber>1</GroupNumber>
       <FileNumber>2</FileNumber>
       <FileType>1</FileType>
-      <tvExp>1</tvExp>
+      <tvExp>0</tvExp>
       <Focus>0</Focus>
 <<<<<<< HEAD
+      <ColumnNumber>6</ColumnNumber>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <TopLine>250</TopLine>
+      <CurrentLine>251</CurrentLine>
+=======
+<<<<<<< HEAD
+      <ColumnNumber>6</ColumnNumber>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <TopLine>495</TopLine>
+      <CurrentLine>205</CurrentLine>
+=======
       <ColumnNumber>11</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
       <TopLine>264</TopLine>
       <CurrentLine>250</CurrentLine>
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-      <ColumnNumber>41</ColumnNumber>
-      <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>286</TopLine>
-      <CurrentLine>204</CurrentLine>
-=======
-=======
->>>>>>> 8a2b4bd52168270e98f9743d978c9be1b5b634a2
-      <ColumnNumber>52</ColumnNumber>
-      <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>481</TopLine>
-      <CurrentLine>502</CurrentLine>
-<<<<<<< HEAD
->>>>>>> dd38ec5526374264ac939ae436c9b408cda51b37
-=======
 >>>>>>> 8a2b4bd52168270e98f9743d978c9be1b5b634a2
 >>>>>>> 2a3cb5248f4c5d7041ea50c8e3f285b3c4b92b9d
       <bDave2>0</bDave2>
@@ -218,10 +212,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>28</ColumnNumber>
+      <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>13</TopLine>
-      <CurrentLine>42</CurrentLine>
+      <TopLine>0</TopLine>
+      <CurrentLine>0</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\portInitializations.c</PathWithFileName>
       <FilenameWithoutPath>portInitializations.c</FilenameWithoutPath>
@@ -234,10 +228,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>27</ColumnNumber>
+      <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>165</TopLine>
-      <CurrentLine>177</CurrentLine>
+      <TopLine>0</TopLine>
+      <CurrentLine>0</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\PWM.c</PathWithFileName>
       <FilenameWithoutPath>PWM.c</FilenameWithoutPath>
@@ -250,10 +244,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>35</ColumnNumber>
+      <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>13</TopLine>
-      <CurrentLine>14</CurrentLine>
+      <TopLine>0</TopLine>
+      <CurrentLine>0</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\UART.c</PathWithFileName>
       <FilenameWithoutPath>UART.c</FilenameWithoutPath>
@@ -269,19 +263,16 @@
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
 <<<<<<< HEAD
+      <TopLine>3</TopLine>
+=======
+<<<<<<< HEAD
+      <TopLine>0</TopLine>
+      <CurrentLine>0</CurrentLine>
+=======
       <TopLine>2</TopLine>
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-      <TopLine>9</TopLine>
-      <CurrentLine>10</CurrentLine>
-=======
-=======
->>>>>>> 8a2b4bd52168270e98f9743d978c9be1b5b634a2
-      <TopLine>1</TopLine>
 >>>>>>> 2a3cb5248f4c5d7041ea50c8e3f285b3c4b92b9d
       <CurrentLine>13</CurrentLine>
->>>>>>> dd38ec5526374264ac939ae436c9b408cda51b37
+>>>>>>> 8a2b4bd52168270e98f9743d978c9be1b5b634a2
       <bDave2>0</bDave2>
       <PathWithFileName>.\Nokia5110.c</PathWithFileName>
       <FilenameWithoutPath>Nokia5110.c</FilenameWithoutPath>
@@ -296,13 +287,8 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-<<<<<<< HEAD
-      <TopLine>53</TopLine>
-      <CurrentLine>79</CurrentLine>
-=======
-      <TopLine>1</TopLine>
-      <CurrentLine>1</CurrentLine>
->>>>>>> dd38ec5526374264ac939ae436c9b408cda51b37
+      <TopLine>0</TopLine>
+      <CurrentLine>0</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\uartCommunication.c</PathWithFileName>
       <FilenameWithoutPath>uartCommunication.c</FilenameWithoutPath>
@@ -345,32 +331,19 @@
       <GroupNumber>1</GroupNumber>
       <FileNumber>10</FileNumber>
       <FileType>1</FileType>
-      <tvExp>1</tvExp>
+      <tvExp>0</tvExp>
       <Focus>0</Focus>
 <<<<<<< HEAD
-      <ColumnNumber>18</ColumnNumber>
+      <ColumnNumber>8</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>118</TopLine>
-      <CurrentLine>152</CurrentLine>
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-      <ColumnNumber>5</ColumnNumber>
-      <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>157</TopLine>
+      <TopLine>164</TopLine>
       <CurrentLine>176</CurrentLine>
 =======
-=======
->>>>>>> 8a2b4bd52168270e98f9743d978c9be1b5b634a2
-      <ColumnNumber>2</ColumnNumber>
+      <ColumnNumber>18</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>98</TopLine>
-      <CurrentLine>98</CurrentLine>
-<<<<<<< HEAD
->>>>>>> dd38ec5526374264ac939ae436c9b408cda51b37
-=======
+      <TopLine>136</TopLine>
+      <CurrentLine>152</CurrentLine>
 >>>>>>> 8a2b4bd52168270e98f9743d978c9be1b5b634a2
->>>>>>> 2a3cb5248f4c5d7041ea50c8e3f285b3c4b92b9d
       <bDave2>0</bDave2>
       <PathWithFileName>.\robotArmMovement.c</PathWithFileName>
       <FilenameWithoutPath>robotArmMovement.c</FilenameWithoutPath>
@@ -383,10 +356,18 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
+<<<<<<< HEAD
+      <ColumnNumber>19</ColumnNumber>
+=======
+<<<<<<< HEAD
+      <ColumnNumber>0</ColumnNumber>
+=======
       <ColumnNumber>18</ColumnNumber>
+>>>>>>> 8a2b4bd52168270e98f9743d978c9be1b5b634a2
+>>>>>>> 2a3cb5248f4c5d7041ea50c8e3f285b3c4b92b9d
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>1</TopLine>
-      <CurrentLine>21</CurrentLine>
+      <TopLine>0</TopLine>
+      <CurrentLine>0</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\delayFunctions.c</PathWithFileName>
       <FilenameWithoutPath>delayFunctions.c</FilenameWithoutPath>

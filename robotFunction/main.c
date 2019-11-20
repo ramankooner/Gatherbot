@@ -22,7 +22,7 @@
 #define Kd 45
 
 // Drop Off PID Control
-#define dKp 3000
+#define dKp 1500
 #define dKi 0
 #define dKd 0
 
@@ -72,14 +72,18 @@ float dMotorSpeed;
 int ballCount;
 
 enum state {
-	//SEARCH_BALL,
-	//APPROACH_BALL,
+	SEARCH_BALL,
+	APPROACH_BALL,
 	STOP_CAR,
 	ADJUST_DISTANCE,
 	STOP_CAR2,
 	GET_DISTANCE,
 	PICK_UP,
-	CHECK_COUNT
+	CHECK_COUNT,
+	SEARCH_DROPOFF,
+	APPROACH_DROPOFF,
+	DROPOFF_STOP,
+	BACKUP_DROPOFF
 } state;
 	
 int main(void){
@@ -121,11 +125,9 @@ int main(void){
 	// NOTE - CHANGE THIS TO WORK WITH PD0 AND PD1
 	//      - CHANGE DIRECTION CONTROL TO PD2,PD3,PD4,PD5
 	
-	// PD0
-	M0PWM6_Init(15625, 6000);
-	
-	// PD1
-	M0PWM7_Init(15625, 6000);
+	// Initialize Motors
+	M0PWM6_Init(15625, 3);
+	M0PWM7_Init(15625, 3);
 	
 	// Control the Direction of the Motors
 	// 0x05 - Backwards
@@ -133,7 +135,7 @@ int main(void){
 	GPIO_PORTB_DATA_R = 0x0A;
 
 	// GREEN COLOR FOR POWER CHECK
-	GPIO_PORTF_DATA_R = 0x08;
+	GPIO_PORTF_DATA_R = 0x02;
 	
 	// UART Flag
 	uartFlag = 1;
@@ -199,74 +201,67 @@ int main(void){
 		}
 		
 		// START BYTE
-		Nokia5110_SetCursor(3,2);
-		Nokia5110_OutUDec(finalXCoordinateValue);
-		Nokia5110_SetCursor(3,3);
-		Nokia5110_OutUDec(finalDistance);
+		
 		Nokia5110_SetCursor(3,4);
 		Nokia5110_OutUDec(checkDisplay); 
 		Nokia5110_SetCursor(3,5);
 		Nokia5110_OutUDec(command);
 		
 		// FIND DROP OFF
-		
-		
-		if (finalDistance > 30) {
-			motorSpeed = controlLoop(80, finalXCoordinateValue);
-			motorPIDcontrol(motorSpeed);
-			GPIO_PORTF_DATA_R = 0x08;
-		}
-		else { 
 			switch(state) {
-				/*
+				
 				case SEARCH_BALL:
 				
-					// searching algorithm
-					if (buffer[1] == 0x41) {
-						M0PWM6_Duty(3);
-						M0PWM7_Duty(3);
-						state = APPROACH_BALL;
-					}
-					else{
-						GPIO_PORTB_DATA_R = 0x0A; //Forward Direction
 						
 						// TEMP - SEARCH IN PLACE
 						// Slow Pivot
-						M0PWM3_DUTY(3);
-						M0PW3_DUTY(7000);
-						count++;
-						
-						if ( count == 60) {
-							M0PWM6_Duty(3);
-							M0PWM7_Duty(3);
 							
-							// move forward
-							for(i = 0; i < 30; i++) {
-								M0PMW6_Duty(6000);
-								M0PWM7_Duty(6000);
+						// move forward
+						Nokia5110_SetCursor(3,3);
+						Nokia5110_OutUDec(40);
+						if (buffer[1] != 0x41) {
+						//	GPIO_PORTB_DATA_R = 0x09;
+							for(g = 0; g < 1; g++) {
+								M0PWM6_Duty(5200);
+								M0PWM7_Duty(3);
+								Delay3();
 							}
-							// object avoidance code
 						}
-					}
+						
+						else {
+							GPIO_PORTB_DATA_R = 0x0A;
+							for (g = 0; g < 2; g++) {
+								M0PWM6_Duty(3);
+								M0PWM7_Duty(3);
+								Delay2();
+							}
+							state = APPROACH_BALL;
+						}
+						
+							// object avoidance code
+
 					break;
 				
 				case APPROACH_BALL:
-				
-					if (buffer[1] == 0x41) {
+					
+					Nokia5110_SetCursor(3,3);
+					Nokia5110_OutUDec(50);
+					GPIO_PORTF_DATA_R = 0x08;
+		//			if (buffer[1] == 0x41) {
+					if (finalDistance > 20) {
 						motorSpeed = controlLoop(80, finalXCoordinateValue);
 						motorPIDcontrol(motorSpeed);
-						GPIO_PORTF_DATA_R = 0x08;
-						
-						if (finalDistance < 20) {
-							state = STOP_CAR;
-						}
 					}
-					
 					else {
-						state = SEARCH_BALL;
+						state = STOP_CAR;
 					}
+			//			if (finalDistance < 20) {
+			//				state = STOP_CAR;
+		//				}
+	//				}
+					
 					break;
-				*/
+				
 				case STOP_CAR:
 					GPIO_PORTF_DATA_R = 0x0A;
 					M0PWM6_Duty(3);
@@ -328,52 +323,69 @@ int main(void){
 				
 				case CHECK_COUNT:
 					if(ballCount == 2){
-						//state = SEARCH_DROPOFF;
+						state = SEARCH_DROPOFF;
 					}
 					else {
-						//state = BALL_SEARCH;
+						state = SEARCH_BALL;
 					}
 					break;
 					
-				/*
+				
 				case SEARCH_DROPOFF:
-					if (buffer[1] == 0x43) {
-						// drop off in view
-						state = APPROACH_DROPOFF;
-					}
-					else {
-						// KEEP SEARCHING
-					}
+					GPIO_PORTF_DATA_R = 0x04;
+					if (buffer[1] != 0x45) {
+						//	GPIO_PORTB_DATA_R = 0x09;
+							for(g = 0; g < 1; g++) {
+								M0PWM6_Duty(5200);
+								M0PWM7_Duty(3);
+								Delay3();
+							}
+						}
+						
+						else {
+							GPIO_PORTB_DATA_R = 0x0A;
+							for (g = 0; g < 2; g++) {
+								M0PWM6_Duty(3);
+								M0PWM7_Duty(3);
+								Delay2();
+							}
+							state = APPROACH_DROPOFF;
+						}
 					break;
-					
+				
 				case APPROACH_DROPOFF:
 					
-					// PID ON DROP OFF
-					
-					
-					if (dFinalDistance < 20) {
-						// drop off movement
-						//dropOffMovement();
-						ballCount = 0;
-						state = MOVE_FORWARD;
-					}
-					
-					break;
-					
-				case MOVE_FORWARD:
+					GPIO_PORTF_DATA_R = 0x08;
 				
-					M0PWM6_Duty(5000);
-					M0PWM7_Duty(5000);
-					for(i = 0; i < 10; i++) {
-						Delay3();
+					if (dFinalDistance > 20) {
+						motorSpeed = controlLoop(80, dFinalX);
+						motorPIDcontrol(motorSpeed);
+					}
+					else {
+						state = DROPOFF_STOP;
 					}
 					
-					state = SEARCH_BALL;
+				case DROPOFF_STOP:
+					GPIO_PORTF_DATA_R = 0x0A;
+					M0PWM6_Duty(3);
+					M0PWM7_Duty(3);
+					for (g = 0; g < 3; g++) {
+						Delay2();
+					}
+					
+					state = BACKUP_DROPOFF;
 					break;
-				*/
+				
+				case BACKUP_DROPOFF:
+					
+					dropOffMovement();
+					ballCount = 0;
+					state = SEARCH_BALL;
+				
+					break;	
 			}
 		}	
-	}
+	
 }
 
 /*
@@ -467,15 +479,11 @@ void distancePIDcontrol(float distanceOut) {
 	rightSpeed = floor(distanceOut);
 	
 	if(leftSpeed < 0) leftSpeed = 2;
-	else if (leftSpeed > 15000) leftSpeed = 8000;
+	else if (leftSpeed > 15000) leftSpeed = 6000;
 	if(rightSpeed < 0) rightSpeed = 2;
-	else if (rightSpeed > 15000) rightSpeed = 8000;	
+	else if (rightSpeed > 15000) rightSpeed = 6000;	
 	
-	// DISPLAY SPEEDS ON LCD
-	Nokia5110_SetCursor(3,0);
-	Nokia5110_OutUDec(leftSpeed);
-	Nokia5110_SetCursor(3,1);
-	Nokia5110_OutUDec(rightSpeed);
+	
 	
 	// Update Speeds
 	M0PWM6_Duty(leftSpeed);
@@ -504,6 +512,12 @@ void motorPIDcontrol(float motorPIDOutput) {
 	// Update Speeds
 	M0PWM6_Duty(leftPWMSpeed);
 	M0PWM7_Duty(rightPWMSpeed);
+	
+	// DISPLAY SPEEDS ON LCD
+	Nokia5110_SetCursor(3,0);
+	Nokia5110_OutUDec(leftPWMSpeed);
+	Nokia5110_SetCursor(3,1);
+	Nokia5110_OutUDec(rightPWMSpeed);
 }
 
 
