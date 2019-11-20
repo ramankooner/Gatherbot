@@ -147,7 +147,7 @@ int main(void){
 			GPIO_PORTB_DATA_R = 0x0A;
 			n = UART_InChar();
 			
-			//PACKAGE: START | COMMAND | XCOORD1 | XCOORD0 | YCOORD1 | YCOORD0 | BALL DISTANCE | DROPOFF X1 | DROPOFF X0 | CHECK SUM
+			//PACKAGE: START | COMMAND | XCOORD1 | XCOORD0 | YCOORD1 | YCOORD0 | BALL DISTANCE | DROPOFF X1 | DROPOFF X0 | DROPOFF DISTANCE | CHECK SUM
 			if (n == 0x41) { //Start of Package
 				buffer[0] = n;
 				
@@ -467,9 +467,9 @@ void distancePIDcontrol(float distanceOut) {
 	rightSpeed = floor(distanceOut);
 	
 	if(leftSpeed < 0) leftSpeed = 2;
-	else if (leftSpeed > 15000) leftSpeed = 15000;
+	else if (leftSpeed > 15000) leftSpeed = 8000;
 	if(rightSpeed < 0) rightSpeed = 2;
-	else if (rightSpeed > 15000) rightSpeed = 15000;	
+	else if (rightSpeed > 15000) rightSpeed = 8000;	
 	
 	// DISPLAY SPEEDS ON LCD
 	Nokia5110_SetCursor(3,0);

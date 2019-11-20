@@ -40,38 +40,6 @@ void M0PWM0_Duty(uint16_t duty){
   PWM0_0_CMPA_R = duty - 1;             // 6) count value when output rises
 }
 
-// NOT BEING USED
-// OLD PB7 MODULE
-/*
-void M0PWM1_Init(uint16_t period, uint16_t duty){
-  volatile unsigned long delay;
-  SYSCTL_RCGCPWM_R |= 0x01;             // 1) activate PWM0
-  SYSCTL_RCGCGPIO_R |= 0x02;            // 2) activate port B
-  delay = SYSCTL_RCGCGPIO_R;            // allow time to finish activating
-  GPIO_PORTB_AFSEL_R |= 0x80;           // enable alt funct on PB7
-  GPIO_PORTB_PCTL_R &= ~0xF0000000;     // configure PB7 as M0PWM1
-  GPIO_PORTB_PCTL_R |= 0x40000000;
-  GPIO_PORTB_AMSEL_R &= ~0x80;          // disable analog functionality on PB7
-  GPIO_PORTB_DEN_R |= 0x80;             // enable digital I/O on PB7
-  SYSCTL_RCC_R |= SYSCTL_RCC_USEPWMDIV; // 3) use PWM divider
-  SYSCTL_RCC_R &= ~SYSCTL_RCC_PWMDIV_M; //    clear PWM divider field
-  SYSCTL_RCC_R += SYSCTL_RCC_PWMDIV_2;  //    configure for /2 divider
-  PWM0_0_CTL_R = 0;                     // 4) re-loading down-counting mode
-  PWM0_0_GENB_R = (PWM_0_GENB_ACTCMPBD_ONE|PWM_0_GENB_ACTLOAD_ZERO);
-  // PB7 goes low on LOAD
-  // PB7 goes high on CMPB down
-  PWM0_0_LOAD_R = period - 1;           // 5) cycles needed to count down to 0
-  PWM0_0_CMPB_R = duty - 1;             // 6) count value when output rises
-  PWM0_0_CTL_R |= 0x00000001;           // 7) start PWM0
-  PWM0_ENABLE_R |= 0x00000002;          // enable PB7/M0PWM1
-}
-// change duty cycle of PB7
-// duty is number of PWM clock cycles output is high  (2<=duty<=period-1)
-void M0PWM1_Duty(uint16_t duty){
-  PWM0_0_CMPB_R = duty - 1;             // 6) count value when output rises
-}
-*/
-
 //********************************************
 //****************  PB7  *********************
 //***************  M0PWM1 ********************
@@ -179,6 +147,42 @@ void M0PWM3_Duty(uint16_t duty) {
 
 
 //********************************************
+//****************  PE4  *********************
+//***************  M0PWM4 ********************
+//********************************************
+/*
+void M0PWM4_Init(uint16_t period, uint16_t duty) {
+	volatile unsigned long delay;
+	SYSCTL_RCGCPWM_R |= 0x01;             // Activate PWM0
+	SYSCTL_RCGCGPIO_R |= 0x10;            // Activate port E
+	delay = SYSCTL_RCGCGPIO_R;
+	GPIO_PORTE_AFSEL_R |= 0x10;           // Alt funct on PE4
+	GPIO_PORTE_PCTL_R &= 0xFFF0FFFF;      // configure PE4 as M0PWM4
+	GPIO_PORTE_PCTL_R |= 0x00040000;
+	GPIO_PORTE_DIR_R |= 0x10;             // Set PE4 output
+	GPIO_PORTE_AMSEL_R &= ~0x10;          // disable analong funct on PE4
+	GPIO_PORTE_DEN_R |= 0x10;             // enable digital I/O on PE4
+	
+	SYSCTL_RCGCPWM_R |= 0x01;             // Active PWM0	
+	SYSCTL_RCGCGPIO_R |= 0x10;            // Clock for Port E
+	SYSCTL_RCC_R |= SYSCTL_RCC_USEPWMDIV; // 3) use PWM divider
+  SYSCTL_RCC_R &= ~SYSCTL_RCC_PWMDIV_M; //    clear PWM divider field
+  SYSCTL_RCC_R += SYSCTL_RCC_PWMDIV_64;  //    configure for /64 divider       
+	
+	PWM0_2_CTL_R = 0x00;                  // re-loading down
+	PWM0_2_GENA_R |= 0x000000C8;          // low on load
+	PWM0_2_LOAD_R = period - 1;           // cycles needed to count to 0
+	PWM0_2_CMPA_R = duty;                 // count value when output rises
+	PWM0_2_CTL_R |= 0x00000001;           // start PWM0
+	PWM0_ENABLE_R |= 0x08;                // enable M0PWM4
+}
+
+void M0PWM4_Duty(uint16_t duty) {
+	PWM0_2_CMPA_R = duty - 1;
+}
+*/
+
+//********************************************
 //****************  PD0  *********************
 //***************  M0PWM6 ********************
 //********************************************
@@ -247,8 +251,6 @@ void M0PWM7_Duty(uint16_t duty) {
 	PWM0_3_CMPB_R = duty - 1;
 }
 
-
-// CHANGE THIS ONE -- OUR LCD CONNECTS TO PA7
 //********************************************
 //****************  PA7  *********************
 //***************  M1PWM3 ********************

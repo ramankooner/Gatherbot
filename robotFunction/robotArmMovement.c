@@ -1,6 +1,7 @@
 #include "delayFunctions.h"
 #include "PWM.h"
 #include "tm4c123gh6pm.h"
+#include "robotArmMovement.h"
 
 // JOINT 1 - BOTTOM SERVO - PB5
 // JOINT 2 - SECOND SERVO - PB6
@@ -149,11 +150,21 @@ void dropOffMovement(void) {
 		GPIO_PORTF_DATA_R = 0x04;
 	}
 	
-	// open the gate
-	// wait 10 seconds
-	// close the gate
+	// Gate Commands
+	openGate();
 }
 
+void openGate(void) {
+	int j; 
+	M1PWM3_Duty(800); // open the gate - connected to PA7
+	
+	// Delay ~10 seconds
+	for (j = 0; j < 10; j++) {
+		Delay2();
+	}
+	
+	M1PWM3_Duty(400); // close the gate
+}
 int adjustRobot(int current, int final) {
 		int adjustFlag;
 		if (current > final) {
