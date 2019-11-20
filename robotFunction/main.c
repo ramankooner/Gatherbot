@@ -219,7 +219,7 @@ int main(void){
 						// move forward
 						Nokia5110_SetCursor(3,3);
 						Nokia5110_OutUDec(40);
-						if (buffer[1] != 0x41) {
+						if (buffer[1] != 0x41) { //No ball found. Pivot.
 						//	GPIO_PORTB_DATA_R = 0x09;
 							for(g = 0; g < 1; g++) {
 								M0PWM6_Duty(5200);
@@ -228,7 +228,7 @@ int main(void){
 							}
 						}
 						
-						else {
+						else { //Ball found. Pause, then update state.
 							GPIO_PORTB_DATA_R = 0x0A;
 							for (g = 0; g < 2; g++) {
 								M0PWM6_Duty(3);
@@ -276,17 +276,48 @@ int main(void){
 					
 				case ADJUST_DISTANCE:
 					GPIO_PORTF_DATA_R = 0x04;
-					distanceSpeed = controllerLoop(17, finalDistance);
-			
-					distancePIDcontrol(distanceSpeed + 2);
+					if (finalDistance != 16){
+						if (finalDistance < 16){
+							GPIO_PORTB_DATA_R = 0x05; //Backward
+							M0PWM6_Duty(5000);
+							M0PWM7_Duty(5000);
+							for (g = 0; g < 2; g++) {
+								Delay3();
+							}
+							M0PWM6_Duty(3);
+							M0PWM7_Duty(3);
+						}
+						else if (finalDistance > 16){
+							GPIO_PORTB_DATA_R = 0x0A; //Forward
+							M0PWM6_Duty(5000);
+							M0PWM7_Duty(5000);
+							for (g = 0; g < 2; g++) {
+								Delay3();
+							}
+							M0PWM6_Duty(3);
+							M0PWM7_Duty(3);
+						}
+					}
+					else{ //First check for distance == 16.
+						for (g = 0; g < 2; g++) {
+								Delay2();
+						}
+						state = GET_DISTANCE;
+						
+					}
 					
-					if (finalDistance >=15 && finalDistance <= 17) {
-						state = STOP_CAR2;
-					} 
 					
 					break;
 				
-				case STOP_CAR2:
+				case GET_DISTANCE:
+					if(finalDistance == 16){ //Second check for distance == 16
+						state = PICK_UP;
+					}
+					else{
+						state = ADJUST_DISTANCE;
+					}
+				
+					/*
 					GPIO_PORTF_DATA_R = 0x02;
 					M0PWM6_Duty(3);
 					M0PWM7_Duty(3);
@@ -295,18 +326,19 @@ int main(void){
 					}
 					
 					state = GET_DISTANCE;
+					*/
 					
 					break;
 					
-				case GET_DISTANCE:
-					
+				case STOP_CAR2:
+					/*
 					if (finalDistance >=15 && finalDistance <= 17) {
 						state = PICK_UP;
 					}
 					else {
 						state = ADJUST_DISTANCE;
 					}
-					
+					*/
 					break;
 				
 				case PICK_UP:
@@ -372,15 +404,13 @@ int main(void){
 					for (g = 0; g < 3; g++) {
 						Delay2();
 					}
-					
 					state = BACKUP_DROPOFF;
 					break;
 				
 				case BACKUP_DROPOFF:
-					
-					dropOffMovement();
-					ballCount = 0;
-					state = SEARCH_BALL;
+					dropOffMovement(); //180 back up
+					ballCount = 0; //Reset ball count
+					state = SEARCH_BALL; //Restart search
 				
 					break;	
 			}
