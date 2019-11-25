@@ -1,7 +1,21 @@
 // Servo Motor - Robotic Arm: Created 7/21/2019
 // Added UART Communication Protocol - 9/12/2019
 // Added Robotic Arm Movement - 9/29/2019
-// Test
+// Added PID Loop
+// Added Drop off Movement
+// Added Distance Control
+// Added Gate Movement
+
+// Color    LED(s) PortF
+// dark     ---    0
+// red      R--    0x02
+// blue     --B    0x04
+// green    -G-    0x08
+// yellow   RG-    0x0A
+// sky blue -GB    0x0C
+// white    RGB    0x0E
+// pink     R-B    0x06
+
 #include "tm4c123gh6pm.h"
 #include "PWM.h"
 #include "portInitializations.h"
@@ -35,10 +49,7 @@ float controllerLoop(float setPoint, float processVariable);
 void motorPIDcontrol(float motorPIDOutput);
 void distancePIDcontrol(float distanceOut);
 
-// PID Loop for Drop Off Location
-float dropOffControlLoop(float dSP, float dPV);
-void dropOffControl(float dOutput);
-	
+
 unsigned char n;
 int i,k,j,g;
 int buffer_count;
@@ -64,7 +75,7 @@ int command;
 // Motor Control
 int leftPWMSpeed;
 int rightPWMSpeed;
-float motorSpeed, distanceSpeed; 
+float motorSpeed, distanceSpeed;
 
 // Drop Off Control
 int dLeftPWMSpeed;
@@ -102,7 +113,6 @@ int main(void){
 	Nokia5110_Clear();
 	GPIO_PORTF_DATA_R = 0x00;
 	
-	ballCount = 0;
 	
 	// ARM MOVEMENT
 	// Initialize Arm
@@ -115,22 +125,10 @@ int main(void){
 	Delay2();
 	M0PWM2_Init(15625, 320);      // PB4 - Open hand 
 	Delay2();
-	//M1PWM3_Init(15625, 200);      // PA7 - Close the gate
-	
-	// EXECUTE ROBOTIC ARM MOVEMENT 
-	// X-coordinate value - TESTING
-	//xValue = 80;
-	
-	// Executes the Pick Up movement only - TESTING
-	//pickUpValue = armPickUpLocation(xValue);
-	
-	//pickUp(pickUpValue);
-	
+	M0PWM4_Init(15625, 200);      // PE4 - Close The Gate
+
+
 	// MOTOR CONTROL
-	
-	// NOTE - CHANGE THIS TO WORK WITH PD0 AND PD1
-	//      - CHANGE DIRECTION CONTROL TO PD2,PD3,PD4,PD5
-	
 	// Initialize Motors
 	M0PWM6_Init(15625, 3);
 	M0PWM7_Init(15625, 3);
@@ -195,8 +193,8 @@ int main(void){
 				uartFlag = 0;
 			}
 		}
-		else{ //ADDED ELSE
-			GPIO_PORTF_DATA_R = 0x02;
+		else{ // Blink Pink Color
+			GPIO_PORTF_DATA_R = 0x06;
 		}
 		
 		// UART FLAG == 0
@@ -211,17 +209,13 @@ int main(void){
 			// Set Flag back to 1 to take in data again
 			uartFlag = 1;
 		}
-		else{ //ADDED ELSE
+		else{ // Blink Red Color
 			GPIO_PORTF_DATA_R = 0x02;
 		}
 		
-		// START BYTE
+		// Display Distance
 		Nokia5110_SetCursor(3,2);
 		Nokia5110_OutUDec(finalDistance);
-		Nokia5110_SetCursor(3,4);
-		Nokia5110_OutUDec(checkDisplay); 
-		Nokia5110_SetCursor(3,5);
-		Nokia5110_OutUDec(command);
 		
 		// FIND DROP OFF
 		switch(state) {
@@ -319,7 +313,7 @@ int main(void){
 					}
 					*/
 				}
-				else{ //First check for distance == 16.
+				else{ //First check for distance == 17.
 					for (g = 0; g < 2; g++) {
 							Delay2();
 					}
@@ -329,7 +323,7 @@ int main(void){
 				break;
 			
 			case GET_DISTANCE:
-				if(finalDistance == 17){ //Second check for distance == 16
+				if(finalDistance == 17){ //Second check for distance == 17
 					state = CHECK_COORD;
 				}
 				else{
@@ -342,25 +336,27 @@ int main(void){
 					state = ADJUST_DISTANCE;
 					coord_count = 0;
 				}
-				else if (coord_count == 10){ //10 iterations of UARt read (Check X-Coordinate)
+				
+				else {
+					if (coord_count == 10){ //10 iterations of UART read (Check X-Coordinate)
 					coord_count = 0;
 					state = PICK_UP;
-					GPIO_PORTF_DATA_R = 0x0C;
-				}	
-				else{
-					coord_count += 1;
-					state = CHECK_COORD;
+					}	
+					else{
+						coord_count += 1;
+						state = CHECK_COORD;
+					}
 				}
+				
 				break;
 			
 			case PICK_UP:
 				// Executes the Pick Up movement 
-				GPIO_PORTF_DATA_R = 0x0B;
+				GPIO_PORTF_DATA_R = 0x06;
 				GPIO_PORTB_DATA_R = 0x0A;
 				pickUpValue = armPickUpLocation(finalXCoordinateValue);
 				armMovement(pickUpValue);
 				
-				//ballCount++;
 				state = BUFFER_RESET;
 			
 				break;
@@ -379,15 +375,16 @@ int main(void){
 			case ADD_COUNT:
 				uartFlag = 0;
 				ballCount++;
+			
 				Nokia5110_SetCursor(3,1);
 				Nokia5110_OutUDec(ballCount);
+			
 				state = CHECK_COUNT;
 			
 				break;
 			
 			case CHECK_COUNT:
-				
-				//uartFlag = 0;
+
 				if(ballCount == 2){
 					state = SEARCH_DROPOFF;
 				}
@@ -398,16 +395,18 @@ int main(void){
 				
 			
 			case SEARCH_DROPOFF:
+				
 				GPIO_PORTF_DATA_R = 0x04;
+			
 				if (buffer[1] != 0x45) {
 					GPIO_PORTB_DATA_R = 0x0A;
-					//	GPIO_PORTB_DATA_R = 0x09;
-						for(g = 0; g < 1; g++) {
-							M0PWM6_Duty(5200);
-							M0PWM7_Duty(3);
-							Delay3();
-						}
+
+					for(g = 0; g < 1; g++) {
+						M0PWM6_Duty(5200);
+						M0PWM7_Duty(3);
+						Delay3();
 					}
+				}
 				else {
 					GPIO_PORTB_DATA_R = 0x0A;
 					for (g = 0; g < 2; g++) {
@@ -417,6 +416,7 @@ int main(void){
 					}
 					state = APPROACH_DROPOFF;
 				}
+				
 				break;
 			
 			case APPROACH_DROPOFF:
@@ -425,8 +425,8 @@ int main(void){
 			
 				if (dFinalDistance > 20) {
 					GPIO_PORTB_DATA_R = 0x0A;
-					motorSpeed = controlLoop(80, dFinalX);
-					motorPIDcontrol(motorSpeed);
+					dMotorSpeed = controlLoop(80, dFinalX);
+					motorPIDcontrol(dMotorSpeed);
 				}
 				else {
 					state = DROPOFF_STOP;
@@ -512,61 +512,6 @@ float controlLoop(float setPoint, float processVariable) {
 
 	return outputControl;
 	
-}
-
-float controllerLoop(float setPoint, float processVariable) {
-	
-	static float prevDError = 0;
-	static float prevProportional = 0;
-	static float proportionalControl = 0;
-	float derror;
-	float outputDControl;
-	
-	prevProportional = proportionalControl;
-	derror = setPoint - processVariable;
-	proportionalControl = derror * dKp;
-	
-	// Overflow Check 
-	if((prevDError > 0) && (derror > 0) && (prevProportional < 0)){
-		proportionalControl = prevProportional;
-	}
-  if((prevDError < 0) && (derror < 0) && (prevProportional > 0)){
-		proportionalControl = prevProportional;
-	}
-
-	// Output
-	// Output should be a ratio of the two PWMs
-	outputDControl = proportionalControl;
-
-	return outputDControl;
-	
-}
-
-void distancePIDcontrol(float distanceOut) {
-	
-	
-	if (distanceOut < 0) {
-		distanceOut = distanceOut * (-1);
-		GPIO_PORTB_DATA_R = 0x0A;
-	}
-	else {
-		distanceOut = distanceOut;
-		GPIO_PORTB_DATA_R = 0x05;
-	}
-	
-	leftSpeed = floor(distanceOut);
-	rightSpeed = floor(distanceOut);
-	
-	if(leftSpeed < 0) leftSpeed = 2;
-	else if (leftSpeed > 15000) leftSpeed = 6000;
-	if(rightSpeed < 0) rightSpeed = 2;
-	else if (rightSpeed > 15000) rightSpeed = 6000;	
-	
-	
-	
-	// Update Speeds
-	M0PWM6_Duty(leftSpeed);
-	M0PWM7_Duty(rightSpeed);
 }
 
 void motorPIDcontrol(float motorPIDOutput) {

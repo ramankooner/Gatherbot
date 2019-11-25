@@ -9,6 +9,64 @@
 
 
 --------------------------------------------------------------------------------------------------------------------------------------------------
+
+// OLD PID LOOP FOR DISTANCE
+
+float controllerLoop(float setPoint, float processVariable) {
+	
+	static float prevDError = 0;
+	static float prevProportional = 0;
+	static float proportionalControl = 0;
+	float derror;
+	float outputDControl;
+	
+	prevProportional = proportionalControl;
+	derror = setPoint - processVariable;
+	proportionalControl = derror * dKp;
+	
+	// Overflow Check 
+	if((prevDError > 0) && (derror > 0) && (prevProportional < 0)){
+		proportionalControl = prevProportional;
+	}
+  if((prevDError < 0) && (derror < 0) && (prevProportional > 0)){
+		proportionalControl = prevProportional;
+	}
+
+	// Output
+	// Output should be a ratio of the two PWMs
+	outputDControl = proportionalControl;
+
+	return outputDControl;
+	
+}
+
+void distancePIDcontrol(float distanceOut) {
+	
+	
+	if (distanceOut < 0) {
+		distanceOut = distanceOut * (-1);
+		GPIO_PORTB_DATA_R = 0x0A;
+	}
+	else {
+		distanceOut = distanceOut;
+		GPIO_PORTB_DATA_R = 0x05;
+	}
+	
+	leftSpeed = floor(distanceOut);
+	rightSpeed = floor(distanceOut);
+	
+	if(leftSpeed < 0) leftSpeed = 2;
+	else if (leftSpeed > 15000) leftSpeed = 6000;
+	if(rightSpeed < 0) rightSpeed = 2;
+	else if (rightSpeed > 15000) rightSpeed = 6000;	
+	
+	
+	
+	// Update Speeds
+	M0PWM6_Duty(leftSpeed);
+	M0PWM7_Duty(rightSpeed);
+}
+--------------------------------------------------------------------------------------------------------------------------------------------------
 	DROP OFF MOVEMENT CODE 
 	
 	/*

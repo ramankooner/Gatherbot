@@ -150,7 +150,6 @@ void M0PWM3_Duty(uint16_t duty) {
 //****************  PE4  *********************
 //***************  M0PWM4 ********************
 //********************************************
-/*
 void M0PWM4_Init(uint16_t period, uint16_t duty) {
 	volatile unsigned long delay;
 	SYSCTL_RCGCPWM_R |= 0x01;             // Activate PWM0
@@ -174,13 +173,13 @@ void M0PWM4_Init(uint16_t period, uint16_t duty) {
 	PWM0_2_LOAD_R = period - 1;           // cycles needed to count to 0
 	PWM0_2_CMPA_R = duty;                 // count value when output rises
 	PWM0_2_CTL_R |= 0x00000001;           // start PWM0
-	PWM0_ENABLE_R |= 0x08;                // enable M0PWM4
+	PWM0_ENABLE_R |= 0x10;                // enable M0PWM4
 }
 
 void M0PWM4_Duty(uint16_t duty) {
 	PWM0_2_CMPA_R = duty - 1;
 }
-*/
+
 
 //********************************************
 //****************  PD0  *********************

@@ -115,8 +115,6 @@ void pickUp(int pickUpValue){
 float armPickUpLocation(int xCord) {
 	float pickUpPWM;
 	
-	//pickUpPWM = (-xCord/3) + 753;
-	//pickUpPWM = (-xCord) + 760;
 	//https://www.analyzemath.com/parabola/three_points_para_calc.html <- website for calculation
 	pickUpPWM = (0.00620*(xCord*xCord)) - (2.5*xCord) + 790;
 	return pickUpPWM;
@@ -153,22 +151,27 @@ void dropOffMovement(void) {
 	}
 	
 	Delay2();
-	Delay2();
-	// Gate Commands
+	
+	// Gate Command
 	//openGate();
+	
+	GPIO_PORTB_DATA_R = 0x0A;
 }
 
 void openGate(void) {
 	int j; 
-	M1PWM3_Duty(630); // open the gate - connected to PA7
+
+	M0PWM4_Duty(630); // open the gate - connected to PA7
 	
 	// Delay ~10 seconds
-	for (j = 0; j < 10; j++) {
+	for (j = 0; j < 5; j++) {
 		Delay2();
 	}
 	
-	M1PWM3_Duty(200); // close the gate
+	M0PWM4_Duty(200); // close the gate
 }
+
+/*
 int adjustRobot(int current, int final) {
 		int adjustFlag;
 		if (current > final) {
@@ -193,7 +196,7 @@ int adjustRobot(int current, int final) {
 		return adjustFlag;
 }
 
-/*
+
 void oldPickUp(void) {
 	Delay2();
 	M0PWM3_Duty(700); //Center PB5
