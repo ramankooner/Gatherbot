@@ -339,8 +339,8 @@ int main(void){
 				
 				else {
 					if (coord_count == 10){ //10 iterations of UART read (Check X-Coordinate)
-					coord_count = 0;
-					state = PICK_UP;
+						coord_count = 0;
+						state = PICK_UP;
 					}	
 					else{
 						coord_count += 1;
