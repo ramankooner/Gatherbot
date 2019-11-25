@@ -61,10 +61,12 @@ void resetArm(void){
 
 void dropArm(void){
 	Delay2();
-	M0PWM1_Duty_new(1800); //PB7 - Reset Height
+	M0PWM1_Duty_new(1700); //PB7 - Reset Height
+	Delay2();
 	Delay2();
 	M0PWM3_Duty(255); //PB5 - To Drop Off
 	Delay2();
+	M0PWM0_Duty(800);
 	Delay2();
 	M0PWM2_Duty(320);  //Hand drops ball
 }
@@ -150,20 +152,22 @@ void dropOffMovement(void) {
 		GPIO_PORTF_DATA_R = 0x04;
 	}
 	
+	Delay2();
+	Delay2();
 	// Gate Commands
-	openGate();
+	//openGate();
 }
 
 void openGate(void) {
 	int j; 
-	M1PWM3_Duty(800); // open the gate - connected to PA7
+	M1PWM3_Duty(630); // open the gate - connected to PA7
 	
 	// Delay ~10 seconds
 	for (j = 0; j < 10; j++) {
 		Delay2();
 	}
 	
-	M1PWM3_Duty(400); // close the gate
+	M1PWM3_Duty(200); // close the gate
 }
 int adjustRobot(int current, int final) {
 		int adjustFlag;

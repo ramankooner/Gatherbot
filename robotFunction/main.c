@@ -41,6 +41,7 @@ void dropOffControl(float dOutput);
 	
 unsigned char n;
 int i,k,j,g;
+int buffer_count;
 
 // ARM Variables
 float pickUpValue;
@@ -70,20 +71,24 @@ int dLeftPWMSpeed;
 int dRightPWMSpeed;
 float dMotorSpeed;
 int ballCount;
+int coord_count;
 
 enum state {
 	SEARCH_BALL,
 	APPROACH_BALL,
 	STOP_CAR,
 	ADJUST_DISTANCE,
-	STOP_CAR2,
 	GET_DISTANCE,
+	CHECK_COORD,
 	PICK_UP,
+	BUFFER_RESET,
+	ADD_COUNT,
 	CHECK_COUNT,
 	SEARCH_DROPOFF,
 	APPROACH_DROPOFF,
 	DROPOFF_STOP,
-	BACKUP_DROPOFF
+	BACKUP_DROPOFF,
+	FINAL_RESET
 } state;
 	
 int main(void){
@@ -99,16 +104,18 @@ int main(void){
 	
 	ballCount = 0;
 	
-	
 	// ARM MOVEMENT
 	// Initialize Arm
+	Delay2();
 	M0PWM3_Init(15625, 720);      // PB5 - To Center
 	Delay2();
-	M0PWM0_Init(15625, 400);      // PB6
+	M0PWM0_Init(15625, 400);      // PB6 - Reset Height Joint 1 
 	Delay2();
-	M0PWM1_Init_new(15625, 1800); // PB7 - Reset Height	
+	M0PWM1_Init_new(15625, 1800); // PB7 - Reset Height	Joint 2
 	Delay2();
 	M0PWM2_Init(15625, 320);      // PB4 - Open hand 
+	Delay2();
+	//M1PWM3_Init(15625, 200);      // PA7 - Close the gate
 	
 	// EXECUTE ROBOTIC ARM MOVEMENT 
 	// X-coordinate value - TESTING
@@ -118,7 +125,6 @@ int main(void){
 	//pickUpValue = armPickUpLocation(xValue);
 	
 	//pickUp(pickUpValue);
-	
 	
 	// MOTOR CONTROL
 	
@@ -134,13 +140,16 @@ int main(void){
 	// 0x0A - Forward
 	GPIO_PORTB_DATA_R = 0x0A;
 
-	// GREEN COLOR FOR POWER CHECK
+	// RED COLOR FOR POWER CHECK
 	GPIO_PORTF_DATA_R = 0x02;
 	
-	// UART Flag
+	// Flags and States
 	uartFlag = 1;
 	pickUpFlag = 0;
 	ballCount = 0;
+	buffer_count = 0;
+	coord_count = 0;
+	state = SEARCH_BALL;
 	
 	while(1) {
 		
@@ -186,11 +195,14 @@ int main(void){
 				uartFlag = 0;
 			}
 		}
+		else{ //ADDED ELSE
+			GPIO_PORTF_DATA_R = 0x02;
+		}
 		
 		// UART FLAG == 0
 		// Error in buffer -- Reset the buffer then start over
 		// Don't care about skipping one coordinate
-		if (uartFlag == 0) {
+		if(uartFlag == 0) {
 			
 			// Empty the buffer
 			for(k = 0; k < sizeof(buffer); k++) {
@@ -199,224 +211,261 @@ int main(void){
 			// Set Flag back to 1 to take in data again
 			uartFlag = 1;
 		}
+		else{ //ADDED ELSE
+			GPIO_PORTF_DATA_R = 0x02;
+		}
 		
 		// START BYTE
-		
+		Nokia5110_SetCursor(3,2);
+		Nokia5110_OutUDec(finalDistance);
 		Nokia5110_SetCursor(3,4);
 		Nokia5110_OutUDec(checkDisplay); 
 		Nokia5110_SetCursor(3,5);
 		Nokia5110_OutUDec(command);
 		
 		// FIND DROP OFF
-			switch(state) {
-				
-				case SEARCH_BALL:
-				
-						
-						// TEMP - SEARCH IN PLACE
-						// Slow Pivot
-							
-						// move forward
-						Nokia5110_SetCursor(3,3);
-						Nokia5110_OutUDec(40);
-						if (buffer[1] != 0x41) { //No ball found. Pivot.
-						//	GPIO_PORTB_DATA_R = 0x09;
-							for(g = 0; g < 1; g++) {
-								M0PWM6_Duty(5200);
-								M0PWM7_Duty(3);
-								Delay3();
-							}
-						}
-						
-						else { //Ball found. Pause, then update state.
-							GPIO_PORTB_DATA_R = 0x0A;
-							for (g = 0; g < 2; g++) {
-								M0PWM6_Duty(3);
-								M0PWM7_Duty(3);
-								Delay2();
-							}
-							state = APPROACH_BALL;
-						}
-						
-							// object avoidance code
-
-					break;
-				
-				case APPROACH_BALL:
-					
-					Nokia5110_SetCursor(3,3);
-					Nokia5110_OutUDec(50);
-					GPIO_PORTF_DATA_R = 0x08;
-		//			if (buffer[1] == 0x41) {
-					if (finalDistance > 20) {
-						motorSpeed = controlLoop(80, finalXCoordinateValue);
-						motorPIDcontrol(motorSpeed);
-					}
-					else {
-						state = STOP_CAR;
-					}
-			//			if (finalDistance < 20) {
-			//				state = STOP_CAR;
-		//				}
-	//				}
-					
-					break;
-				
-				case STOP_CAR:
-					GPIO_PORTF_DATA_R = 0x0A;
-					M0PWM6_Duty(3);
-					M0PWM7_Duty(3);
-					for (g = 0; g < 3; g++) {
-						Delay2();
-					}
-					
-					state = ADJUST_DISTANCE;
-					
-					break; 
-					
-				case ADJUST_DISTANCE:
-					GPIO_PORTF_DATA_R = 0x04;
-					if (finalDistance != 16){
-						if (finalDistance < 16){
-							GPIO_PORTB_DATA_R = 0x05; //Backward
-							M0PWM6_Duty(5000);
-							M0PWM7_Duty(5000);
-							for (g = 0; g < 2; g++) {
-								Delay3();
-							}
-							M0PWM6_Duty(3);
-							M0PWM7_Duty(3);
-						}
-						else if (finalDistance > 16){
-							GPIO_PORTB_DATA_R = 0x0A; //Forward
-							M0PWM6_Duty(5000);
-							M0PWM7_Duty(5000);
-							for (g = 0; g < 2; g++) {
-								Delay3();
-							}
-							M0PWM6_Duty(3);
-							M0PWM7_Duty(3);
-						}
-					}
-					else{ //First check for distance == 16.
-						for (g = 0; g < 2; g++) {
-								Delay2();
-						}
-						state = GET_DISTANCE;
-						
-					}
-					
-					
-					break;
-				
-				case GET_DISTANCE:
-					if(finalDistance == 16){ //Second check for distance == 16
-						state = PICK_UP;
-					}
-					else{
-						state = ADJUST_DISTANCE;
-					}
-				
-					/*
-					GPIO_PORTF_DATA_R = 0x02;
-					M0PWM6_Duty(3);
-					M0PWM7_Duty(3);
-					for (g = 0; g < 3; g++) {
-						Delay2();
-					}
-					
-					state = GET_DISTANCE;
-					*/
-					
-					break;
-					
-				case STOP_CAR2:
-					/*
-					if (finalDistance >=15 && finalDistance <= 17) {
-						state = PICK_UP;
-					}
-					else {
-						state = ADJUST_DISTANCE;
-					}
-					*/
-					break;
-				
-				case PICK_UP:
-					// Executes the Pick Up movement 
-					GPIO_PORTF_DATA_R = 0x0C;
+		switch(state) {
 			
-					pickUpValue = armPickUpLocation(finalXCoordinateValue);
-					armMovement(pickUpValue);
+			case SEARCH_BALL:
+					GPIO_PORTF_DATA_R = 0x02;
 					
-					ballCount++;
-					state = CHECK_COUNT;
-				
-					break;
-				
-				case CHECK_COUNT:
-					if(ballCount == 2){
-						state = SEARCH_DROPOFF;
-					}
-					else {
-						state = SEARCH_BALL;
-					}
-					break;
-					
-				
-				case SEARCH_DROPOFF:
-					GPIO_PORTF_DATA_R = 0x04;
-					if (buffer[1] != 0x45) {
-						//	GPIO_PORTB_DATA_R = 0x09;
-							for(g = 0; g < 1; g++) {
-								M0PWM6_Duty(5200);
-								M0PWM7_Duty(3);
-								Delay3();
-							}
+					// TEMP - SEARCH IN PLACE
+					// Slow Pivot
+					// move forward
+					Nokia5110_SetCursor(3,3);
+					Nokia5110_OutUDec(finalXCoordinateValue);
+			
+					if (buffer[1] != 0x43) { // No ball found
+						for(g = 0; g < 1; g++) {
+							M0PWM6_Duty(5200);
+							M0PWM7_Duty(3);
+							Delay3();
 						}
+					}
+					else { //Ball found. Pause, then update state.
+						GPIO_PORTB_DATA_R = 0x0A;
+						for (g = 0; g < 2; g++) {
+							M0PWM6_Duty(3);
+							M0PWM7_Duty(3);
+							Delay2();
+						}
+						state = APPROACH_BALL;
+					}
+					
+						// object avoidance code
+
+				break;
+			
+			case APPROACH_BALL:
+			
+				GPIO_PORTF_DATA_R = 0x08;
+
+				if (finalDistance > 20) {
+					motorSpeed = controlLoop(80, finalXCoordinateValue);
+					motorPIDcontrol(motorSpeed);
+				}
+				else {
+					state = STOP_CAR;
+				}
+
+				
+				break;
+			
+			case STOP_CAR:
+				GPIO_PORTF_DATA_R = 0x0A;
+				M0PWM6_Duty(3);
+				M0PWM7_Duty(3);
+				for (g = 0; g < 3; g++) {
+					Delay2();
+				}
+				
+				state = ADJUST_DISTANCE;
+				
+				break; 
+				
+			case ADJUST_DISTANCE:
+				Nokia5110_SetCursor(3,3);
+				Nokia5110_OutUDec(finalXCoordinateValue);
+			
+				GPIO_PORTF_DATA_R = 0x04;
+				if (finalDistance != 17){
+					if (finalDistance < 17){
+						GPIO_PORTB_DATA_R = 0x05; //Backward
 						
-						else {
-							GPIO_PORTB_DATA_R = 0x0A;
-							for (g = 0; g < 2; g++) {
-								M0PWM6_Duty(3);
-								M0PWM7_Duty(3);
-								Delay2();
-							}
-							state = APPROACH_DROPOFF;
+						for (g = 0; g < 1; g++) {
+							M0PWM6_Duty(10000);
+							M0PWM7_Duty(10000);
+							Delay();
 						}
-					break;
-				
-				case APPROACH_DROPOFF:
-					
-					GPIO_PORTF_DATA_R = 0x08;
-				
-					if (dFinalDistance > 20) {
-						motorSpeed = controlLoop(80, dFinalX);
-						motorPIDcontrol(motorSpeed);
+						M0PWM6_Duty(3);
+						M0PWM7_Duty(3);
 					}
-					else {
-						state = DROPOFF_STOP;
+					else if (finalDistance > 17){
+						GPIO_PORTB_DATA_R = 0x0A; //Forward
+						
+						for (g = 0; g < 1; g++) {
+							M0PWM6_Duty(10000);
+							M0PWM7_Duty(10000);
+							Delay();
+						}
+						M0PWM6_Duty(3);
+						M0PWM7_Duty(3);
 					}
+				/*	
+					else{ //ADDED ELSE
+						GPIO_PORTB_DATA_R = 0x0A;
+						M0PWM6_Duty(3);
+						M0PWM7_Duty(3);
+					}
+					*/
+				}
+				else{ //First check for distance == 16.
+					for (g = 0; g < 2; g++) {
+							Delay2();
+					}
+					state = GET_DISTANCE;
 					
-				case DROPOFF_STOP:
-					GPIO_PORTF_DATA_R = 0x0A;
-					M0PWM6_Duty(3);
-					M0PWM7_Duty(3);
-					for (g = 0; g < 3; g++) {
+				}
+				break;
+			
+			case GET_DISTANCE:
+				if(finalDistance == 17){ //Second check for distance == 16
+					state = CHECK_COORD;
+				}
+				else{
+					state = ADJUST_DISTANCE;
+				}	
+				break;
+				
+			case CHECK_COORD:
+				if(finalDistance != 17){ //Second check for distance.
+					state = ADJUST_DISTANCE;
+					coord_count = 0;
+				}
+				else if (coord_count == 10){ //10 iterations of UARt read (Check X-Coordinate)
+					coord_count = 0;
+					state = PICK_UP;
+					GPIO_PORTF_DATA_R = 0x0C;
+				}	
+				else{
+					coord_count += 1;
+					state = CHECK_COORD;
+				}
+				break;
+			
+			case PICK_UP:
+				// Executes the Pick Up movement 
+				GPIO_PORTF_DATA_R = 0x0B;
+				GPIO_PORTB_DATA_R = 0x0A;
+				pickUpValue = armPickUpLocation(finalXCoordinateValue);
+				armMovement(pickUpValue);
+				
+				//ballCount++;
+				state = BUFFER_RESET;
+			
+				break;
+			
+			case BUFFER_RESET:
+				if(buffer_count == 10){ //10 iterations of UART read (Flush out excess data samples)
+					buffer_count = 0;
+					state = ADD_COUNT;
+				}
+				else{
+					buffer_count += 1;
+					state = BUFFER_RESET;
+				}
+				break;
+			
+			case ADD_COUNT:
+				uartFlag = 0;
+				ballCount++;
+				Nokia5110_SetCursor(3,1);
+				Nokia5110_OutUDec(ballCount);
+				state = CHECK_COUNT;
+			
+				break;
+			
+			case CHECK_COUNT:
+				
+				//uartFlag = 0;
+				if(ballCount == 2){
+					state = SEARCH_DROPOFF;
+				}
+				else {
+					state = SEARCH_BALL;
+				}
+				break;
+				
+			
+			case SEARCH_DROPOFF:
+				GPIO_PORTF_DATA_R = 0x04;
+				if (buffer[1] != 0x45) {
+					GPIO_PORTB_DATA_R = 0x0A;
+					//	GPIO_PORTB_DATA_R = 0x09;
+						for(g = 0; g < 1; g++) {
+							M0PWM6_Duty(5200);
+							M0PWM7_Duty(3);
+							Delay3();
+						}
+					}
+				else {
+					GPIO_PORTB_DATA_R = 0x0A;
+					for (g = 0; g < 2; g++) {
+						M0PWM6_Duty(3);
+						M0PWM7_Duty(3);
 						Delay2();
 					}
-					state = BACKUP_DROPOFF;
-					break;
+					state = APPROACH_DROPOFF;
+				}
+				break;
+			
+			case APPROACH_DROPOFF:
 				
-				case BACKUP_DROPOFF:
-					dropOffMovement(); //180 back up
-					ballCount = 0; //Reset ball count
-					state = SEARCH_BALL; //Restart search
+				GPIO_PORTF_DATA_R = 0x08;
+			
+				if (dFinalDistance > 20) {
+					GPIO_PORTB_DATA_R = 0x0A;
+					motorSpeed = controlLoop(80, dFinalX);
+					motorPIDcontrol(motorSpeed);
+				}
+				else {
+					state = DROPOFF_STOP;
+				}
 				
-					break;	
-			}
-		}	
+			case DROPOFF_STOP:
+				GPIO_PORTF_DATA_R = 0x0A;
+				M0PWM6_Duty(3);
+				M0PWM7_Duty(3);
+				for (g = 0; g < 3; g++) {
+					Delay2();
+				}
+				state = BACKUP_DROPOFF;
+				break;
+			
+			case BACKUP_DROPOFF:
+				dropOffMovement(); //180 back up
+				GPIO_PORTB_DATA_R = 0x0A;
+				ballCount = 0; //Reset ball count
+				state = FINAL_RESET; //Restart search
+			
+				break;	
+			
+			case FINAL_RESET:
+				if(buffer_count == 10){ //10 iterations of UART read (Flush out excess data samples)
+					buffer_count = 0;
+					state = SEARCH_BALL;
+				}
+				else{
+					buffer_count += 1;
+					state = BUFFER_RESET;
+				}
+				
+				break;
+		}//End State Machine
+		
+	}	//End Superloop
 	
-}
+} //End Main
 
 /*
 PID Notes from Eric:
@@ -544,10 +593,10 @@ void motorPIDcontrol(float motorPIDOutput) {
 	M0PWM7_Duty(rightPWMSpeed);
 	
 	// DISPLAY SPEEDS ON LCD
-	Nokia5110_SetCursor(3,0);
-	Nokia5110_OutUDec(leftPWMSpeed);
-	Nokia5110_SetCursor(3,1);
-	Nokia5110_OutUDec(rightPWMSpeed);
+	//Nokia5110_SetCursor(3,0);
+	//Nokia5110_OutUDec(leftPWMSpeed);
+	//Nokia5110_SetCursor(3,1);
+	//Nokia5110_OutUDec(rightPWMSpeed);
 }
 
 
