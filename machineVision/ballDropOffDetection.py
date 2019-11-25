@@ -40,8 +40,8 @@ orangeUpper = (25, 255, 255)
 
 # define the lower and upper boundaries of "green"
 # rectangle in the HSV color space
-greenLower = (65, 60, 60)
-greenUpper = (80, 255, 255)
+greenLower = (25, 52, 72) #65, 60, 60
+greenUpper = (102, 255, 255) #80, 255, 255
 
 # initialize the list of tracked points, the frame counter,
 # and the coordinate deltas
@@ -96,7 +96,7 @@ def find_marker(image):
 KNOWN_DISTANCE = 6
 KNOWN_WIDTH = 1.5
 
-KNOWN_DISTANCE_DROPOFF = 13.2
+KNOWN_DISTANCE_DROPOFF = 10
 KNOWN_WIDTH_DROPOFF = 1.5
 
 # Ping Pong Ball Distance
@@ -107,6 +107,7 @@ focalLength = ((radius*2) * KNOWN_DISTANCE) / KNOWN_WIDTH
 
 # Drop Off Location Distance
 dImage = cv2.imread("uartImages/uartImage2.jpg")
+dImage = cv2.resize(dImage, (160,120))
 dMarker = find_dropOff(dImage)
 dFocalLength = (dMarker[1][0] * KNOWN_DISTANCE_DROPOFF) / KNOWN_WIDTH_DROPOFF
 
@@ -172,8 +173,8 @@ while True:
     # color space
     frame = cv2.resize(frame, (160, 120))
 
-    blurred = cv2.GaussianBlur(frame, (5, 5), 0) #(11, 11)
-    dBlurred = cv2.GaussianBlur(frame, (5,5), 0)
+    blurred = cv2.GaussianBlur(frame, (11, 11), 0) #(11, 11)
+    dBlurred = cv2.GaussianBlur(frame, (11,11), 0)
 
     hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
     dHsv = cv2.cvtColor(dBlurred, cv2.COLOR_BGR2HSV)
@@ -182,8 +183,8 @@ while True:
     # a series of dilations and erosions to remove any small
     # blobs left in the mask
     mask = cv2.inRange(hsv, orangeLower, orangeUpper)
-    mask = cv2.erode(mask, None, iterations=1) #2, 2
-    mask = cv2.dilate(mask, None, iterations=1)
+    mask = cv2.erode(mask, None, iterations=2) #2, 2
+    mask = cv2.dilate(mask, None, iterations=2)
 
     dMask = cv2.inRange(dHsv, greenLower, greenUpper)
     dMask = cv2.erode(dMask, None, iterations=2)
@@ -218,29 +219,23 @@ while True:
 
         print("Ball X-Coordinate: ", xcoordinate)
 
-        if inches < 0:
-            distanceInch = 0
-        elif inches > 255:
-            distanceInch = 255
-        else:
-            distanceInch = int(round(inches))
+        distanceCM = int(round(inches * 2.54))
 
-        print("Ball Distance: ", distanceInch)
+        print("Distance: ", distanceCM)
+
+        if distanceCM < 0:
+            distanceCM = 0
+        elif distanceCM > 255:
+            distanceCM = 255
+        else:
+            distanceCM = distanceCM
 
         packet[1] = 0x43
         packet[2] = xCord1
         packet[3] = xCord0
         packet[4] = yCord1
         packet[5] = yCord0
-        packet[6] = distanceInch
-
-        #check_sum = packet[0] + packet[1] + packet[2] + packet[3] + packet[4] + packet[5] + packet[6]
-
-        #checkSumByte = check_sum & 0x7F
-
-        #packet[7] = checkSumByte
-
-        #sendIndvBytes(packet)
+        packet[6] = distanceCM
 
         # only proceed if the radius meets a minimum size
         if radius > 10:
@@ -249,10 +244,9 @@ while True:
             cv2.circle(frame, (int(xcoordinate), int(ycoordinate)), int(radius),
                 (255, 0, 0), 8)
             #print("Distance (inches): ", inches)
-            pts.appendleft(center)
 
 
-    if len(dCnts) > 0:
+    elif len(dCnts) > 0:
 
         dC = max(dCnts, key=cv2.contourArea)
 
@@ -266,21 +260,40 @@ while True:
         dXCord1 = (dXCoordinate >> 7) & 0xFF
         dXCord0 = dXCoordinate & 0x7F
 
-        print("Drop Off X-Coord: ", dXCoordinate)
+        #print("Drop Off X-Coord: ", dXCoordinate)
 
-        if dInches < 0:
-            dDistanceInch = 0
-        elif dInches > 255:
-            dDistanceInch = 255
+        distanceCM = int(round(dInches * 2.54))
+
+        print("Distance: ", distanceCM)
+
+        if distanceCM < 0:
+            dDistanceCM = 0
+        elif distanceCM > 255:
+            dDistanceCM = 255
         else:
-            dDistanceInch = round(dInches)
-
-        print("Drop Off Distance: ", dInches)
+            dDistanceCM = distanceCM
 
         packet[1] = 0x45
         packet[7] = dXCord1
         packet[8] = dXCord0
-        packet[9] = dDistanceInch
+        packet[9] = dDistanceCM
+
+        box = cv2.cv.BoxPoints(marker) if imutils.is_cv2() else cv2.boxPoints(dropOff)
+        box = np.int0(box)
+        cv2.drawContours(frame, [box], -1, (0, 255, 0), 2)
+
+    else:
+        packet[1] = 0x47
+        packet[2] = 0x00
+        packet[3] = 0x00
+        packet[4] = 0x00
+        packet[5] = 0x00
+        packet[6] = 0x00
+        packet[7] = 0x00
+        packet[8] = 0x00
+        packet[9] = 0x00
+
+    print("COMMAND :", packet[1])
 
     check_sum = packet[0] + packet[1] + packet[2] + packet[3] + packet[4] + packet[5] + packet[6] + packet[7] + packet[8] + packet[9]
 
@@ -292,7 +305,7 @@ while True:
 
     count += 1
 
-    print("Count: ", count)
+    #print("Count: ", count)
 
     # show the frame to our screen and increment the frame counter
     cv2.imshow("Frame", frame)
