@@ -66,8 +66,6 @@ void dropArm(void){
 	Delay2();
 	M0PWM3_Duty(255); //PB5 - To Drop Off
 	Delay2();
-	M0PWM0_Duty(800);
-	Delay2();
 	M0PWM2_Duty(320);  //Hand drops ball
 }
 
@@ -130,32 +128,43 @@ void armMovement(int pickUpCoord) {
 
 void dropOffMovement(void) {
 	int i;
-	// EDIT THIS FUNCTION SO ROBOT DOES A 180 TURN
+	
+	M0PWM0_Duty(400);
+	M0PWM1_Duty_new(1800);
+	
 	GPIO_PORTB_DATA_R = 0x09; //One forward, one backward
-	M0PWM6_Duty(8200);
-	M0PWM7_Duty(8200);
+	
 	for(i = 0; i < 3; i++){
 		Delay2();
-		GPIO_PORTF_DATA_R = 0x04;
+		M0PWM6_Duty(8200);
+		M0PWM7_Duty(8200);
+		
+		M0PWM0_Duty(400);
+		M0PWM1_Duty_new(1800);
 	}
 	M0PWM6_Duty(3);
 	M0PWM7_Duty(3);
-	GPIO_PORTF_DATA_R = 0x08;
+
+	M0PWM0_Duty(400);
+	M0PWM1_Duty_new(1800);
+	
 	Delay2();
-	GPIO_PORTB_DATA_R = 0x05;
-	M0PWM6_Duty(6700);
-	M0PWM7_Duty(6700);
+	
 	for(i = 0; i < 2; i++){
 		Delay2();
-		GPIO_PORTF_DATA_R = 0x04;
+		M0PWM6_Duty(6700);
+		M0PWM7_Duty(6700);
+		
+		M0PWM0_Duty(400);
+		M0PWM1_Duty_new(1800);
 	}
 	
 	Delay2();
 	
 	// Gate Command
-	//openGate();
+	openGate();
 	
-	GPIO_PORTB_DATA_R = 0x0A;
+	GPIO_PORTB_DATA_R = 0x05;
 }
 
 void openGate(void) {
