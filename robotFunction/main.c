@@ -6,6 +6,12 @@
 // Added Distance Control
 // Added Gate Movement
 
+// Notes from 12/12/19
+// Increase Search Speed because robot sometimes does not move
+// Fix distance from 18 and 16 because robot does not move
+// Sometimes the ball does not go down the pipe - turn the end of the pipe more
+// Fix drop off approach and lighting for green color
+
 // Color    LED(s) PortF
 // dark     ---    0
 // red      R--    0x02
@@ -36,7 +42,7 @@
 #define Kd 45
 
 // Drop Off PID Control
-#define dKp 1500
+#define dKp 2000 //2000
 #define dKi 0
 #define dKd 0
 
@@ -58,7 +64,7 @@ int buffer_count;
 float pickUpValue;
 int xValue;
 int pickUpFlag;
-float leftSpeed, rightSpeed;
+float leftSpeed, rightSpeed, dSpeed;
 
 // UART Variables
 int uartFlag;
@@ -93,7 +99,6 @@ enum state {
 	CHECK_COORD,
 	PICK_UP,
 	BUFFER_RESET,
-	ADD_COUNT,
 	CHECK_COUNT,
 	SEARCH_DROPOFF,
 	APPROACH_DROPOFF,
@@ -119,25 +124,30 @@ int main(void){
 	Delay2();
 	M0PWM3_Init(15625, 720);      // PB5 - To Center
 	Delay2();
-	M0PWM0_Init(15625, 400);      // PB6 - Reset Height Joint 1 
+	M1PWM3_Init(15625, 400);
 	Delay2();
-	M0PWM1_Init_new(15625, 1800); // PB7 - Reset Height	Joint 2
+	M1PWM2_Init(15625, 1800);
 	Delay2();
+	//M0PWM0_Init(15625, 400);      // PB6 - Reset Height Joint 1 
+	//Delay2();
+	//M0PWM1_Init_new(15625, 1800); // PB7 - Reset Height	Joint 2
+	//Delay2();
 	M0PWM2_Init(15625, 320);      // PB4 - Open hand 
 	Delay2();
-	M0PWM4_Init(15625, 200);      // PE4 - Close The Gate
-
+	M0PWM4_Init(15625, 300);      // PE4 - Close The Gate - 630 = Open, 300 = Close
+	Delay2();
+	
 	// MOTOR CONTROL
 	// Initialize Motors
 	M0PWM6_Init(15625, 3);
 	M0PWM7_Init(15625, 3);
 	
 	// Control the Direction of the Motors
-	// 0x05 - Backwards
-	// 0x0A - Forward
+	// 0x05 - Forward
+	// 0x0A - Backward
 	GPIO_PORTB_DATA_R = 0x05;
 
-	// RED COLOR FOR POWER CHECK
+	// No Color on MCU
 	GPIO_PORTF_DATA_R = 0x00;
 	
 	// Flags and States
@@ -148,7 +158,7 @@ int main(void){
 	coord_count = 0;
 	state = SEARCH_BALL;
 	
-	Delay2();
+	// MCU Start Up Detection
 	Delay2();
 	Delay2();
 	
@@ -156,14 +166,13 @@ int main(void){
 	
 	Delay2();
 	Delay2();
-	Delay2();
-	Delay2();
 	
 	while(1) {
 		
 		// UART COMMUNICATION
 		if (uartFlag == 1) {
-			GPIO_PORTB_DATA_R = 0x05;
+			//GPIO_PORTB_DATA_R = 0x05;
+			
 			n = UART_InChar();
 			
 			//PACKAGE: START | COMMAND | XCOORD1 | XCOORD0 | YCOORD1 | YCOORD0 | BALL DISTANCE | DROPOFF X1 | DROPOFF X0 | DROPOFF DISTANCE | CHECK SUM
@@ -226,18 +235,15 @@ int main(void){
 					// TEMP - SEARCH IN PLACE
 					// Slow Pivot
 					// move forward
-					M0PWM0_Duty(400);
-					M0PWM1_Duty_new(1800);
-			
+				
 					if (buffer[1] != 0x43) { // No ball found
 						for(g = 0; g < 1; g++) {
-							M0PWM6_Duty(5200);
-							M0PWM7_Duty(3);
-							Delay3();
+							M0PWM6_Duty(3300);
+							M0PWM7_Duty(2);
+							Delay();
 						}
 					}
 					else { //Ball found. Pause, then update state.
-						GPIO_PORTB_DATA_R = 0x05;
 						for (g = 0; g < 2; g++) {
 							M0PWM6_Duty(3);
 							M0PWM7_Duty(3);
@@ -253,30 +259,25 @@ int main(void){
 			case APPROACH_BALL:
 			
 				GPIO_PORTF_DATA_R = 0x08;
-				
-				M0PWM0_Duty(400);
-				M0PWM1_Duty_new(1800);
-				
-				if (finalDistance > 20) {
+
+				if (finalDistance > 25) {
 					motorSpeed = controlLoop(80, finalXCoordinateValue);
 					motorPIDcontrol(motorSpeed);
 				}
 				else {
+					M0PWM6_Duty(3);
+					M0PWM7_Duty(3);
 					state = STOP_CAR;
 				}
-
 				
 				break;
 			
 			case STOP_CAR:
 				GPIO_PORTF_DATA_R = 0x0A;
 			
-				M0PWM0_Duty(400);
-				M0PWM1_Duty_new(1800);
-			
 				M0PWM6_Duty(3);
 				M0PWM7_Duty(3);
-				for (g = 0; g < 3; g++) {
+				for (g = 0; g < 2; g++) {
 					Delay2();
 				}
 				
@@ -285,51 +286,20 @@ int main(void){
 				break; 
 				
 			case ADJUST_DISTANCE:
-				
+			
 				GPIO_PORTF_DATA_R = 0x04;
-			
-				M0PWM0_Duty(400);
-				M0PWM1_Duty_new(1800);
-			
-				if (finalDistance != 17) {
-					if (finalDistance < 17){
-						GPIO_PORTB_DATA_R = 0x0A; //Backward
-						
-						for (g = 0; g < 1; g++) {
-							M0PWM6_Duty(10000);
-							M0PWM7_Duty(10000);
-							Delay();
-						}
-						M0PWM6_Duty(3);
-						M0PWM7_Duty(3);
-						state = ADJUST_DISTANCE;
-					}
-					else if (finalDistance > 17){
-						GPIO_PORTB_DATA_R = 0x05; //Forward
-						
-						for (g = 0; g < 1; g++) {
-							M0PWM6_Duty(10000);
-							M0PWM7_Duty(10000);
-							Delay();
-						}
-						M0PWM6_Duty(3);
-						M0PWM7_Duty(3);
-						state = ADJUST_DISTANCE;
-					}
-				}
-				else { //First check for distance == 17.
-					for (g = 0; g < 2; g++) {
-							Delay2();
-					}
-					state = GET_DISTANCE;
+								
+				distanceSpeed = controllerLoop(17, finalDistance);
+		
+				distancePIDcontrol(distanceSpeed + 2);
 					
+				if (finalDistance == 17) {
+					state = GET_DISTANCE;
 				}
+
 				break;
 			
 			case GET_DISTANCE:
-				
-				M0PWM0_Duty(400);
-				M0PWM1_Duty_new(1800);
 				
 				if(finalDistance == 17){ //Second check for distance == 17
 					state = CHECK_COORD;
@@ -341,9 +311,6 @@ int main(void){
 				
 			case CHECK_COORD:
 				
-				M0PWM0_Duty(400);
-				M0PWM1_Duty_new(1800);
-			
 				if(finalDistance != 17){ //Second check for distance.
 					state = ADJUST_DISTANCE;
 					coord_count = 0;
@@ -367,27 +334,18 @@ int main(void){
 				GPIO_PORTF_DATA_R = 0x06;
 				GPIO_PORTB_DATA_R = 0x05;
 			
-				M0PWM0_Duty(400);
-				M0PWM1_Duty_new(1800);
-			
 				pickUpValue = armPickUpLocation(finalXCoordinateValue);
 				armMovement(pickUpValue);
 		
 				Delay2();
 				ballCount++;
-			
-				M0PWM0_Duty(400);
-				M0PWM1_Duty_new(1800);
-			
+
 				state = BUFFER_RESET;
 			
 				break;
 			
 			case BUFFER_RESET:
 				
-				M0PWM0_Duty(400);
-				M0PWM1_Duty_new(1800);
-			
 				if(buffer_count == 10){ //10 iterations of UART read (Flush out excess data samples)
 					buffer_count = 0;
 					state = CHECK_COUNT;
@@ -398,21 +356,9 @@ int main(void){
 				}
 				break;
 			
-			case ADD_COUNT:
-		
-			//	ballCount++;
-			//	uartFlag = 0;
-			
-			//	state = CHECK_COUNT;
-			
-				break;
-			
 			case CHECK_COUNT:
 				
-				M0PWM0_Duty(400);
-				M0PWM1_Duty_new(1800);
-
-				if(ballCount >= 1) {
+				if(ballCount >= 2) {
 					state = SEARCH_DROPOFF;
 				}
 				else {
@@ -424,9 +370,6 @@ int main(void){
 			case SEARCH_DROPOFF:
 				
 				GPIO_PORTF_DATA_R = 0x06;
-			
-				M0PWM0_Duty(400);
-				M0PWM1_Duty_new(1800);
 			
 				if (buffer[1] != 0x45) {
 					GPIO_PORTB_DATA_R = 0x05;
@@ -457,11 +400,7 @@ int main(void){
 			
 				Delay2();
 				Delay2();
-				Delay2();
-			
-				M0PWM0_Duty(400);
-				M0PWM1_Duty_new(1800);
-			
+	
 				if (dFinalDistance > 20) {
 					GPIO_PORTB_DATA_R = 0x05;
 					dMotorSpeed = controlLoop(80, dFinalX);
@@ -473,9 +412,6 @@ int main(void){
 				
 			case DROPOFF_STOP:
 				GPIO_PORTF_DATA_R = 0x0C;
-			
-				M0PWM0_Duty(400);
-				M0PWM1_Duty_new(1800);
 			
 				M0PWM6_Duty(3);
 				M0PWM7_Duty(3);
@@ -491,9 +427,6 @@ int main(void){
 				Delay2();
 				Delay2();
 			
-				M0PWM0_Duty(400);
-				M0PWM1_Duty_new(1800);
-			
 				dropOffMovement(); //180 back up
 				GPIO_PORTB_DATA_R = 0x05;
 				ballCount = 0; //Reset ball count
@@ -506,9 +439,6 @@ int main(void){
 			
 			case FINAL_RESET:
 				
-				M0PWM0_Duty(400);
-				M0PWM1_Duty_new(1800);
-			
 				if(buffer_count == 10){ //10 iterations of UART read (Flush out excess data samples)
 					buffer_count = 0;
 					state = SEARCH_BALL;
@@ -578,13 +508,13 @@ void motorPIDcontrol(float motorPIDOutput) {
 	float rightMotorSpeed;
 	
 	// The Motors are going at 51% duty and will change based on PID Output
-	leftMotorSpeed = 6000 - motorPIDOutput;
-	rightMotorSpeed = 6000 + motorPIDOutput;
+	leftMotorSpeed = 3000 - motorPIDOutput;
+	rightMotorSpeed = 3000 + motorPIDOutput;
 	
 	if(leftMotorSpeed < 0) leftMotorSpeed = 2;
-	else if (leftMotorSpeed > 15000) leftMotorSpeed = 15000;
+	else if (leftMotorSpeed > 10000) leftMotorSpeed = 10000;
 	if(rightMotorSpeed < 0) rightMotorSpeed = 2;
-	else if (rightMotorSpeed > 15000) rightMotorSpeed = 15000;	
+	else if (rightMotorSpeed > 10000) rightMotorSpeed = 10000;	
 	
 	// Get the Floor of the Float Values
 	// Send these Values to the Motor PWMs
@@ -597,4 +527,66 @@ void motorPIDcontrol(float motorPIDOutput) {
 
 }
 
+float controllerLoop(float setPoint, float processVariable) {
+	
+	static float prevDError = 0;
+	static float prevProportional = 0;
+	static float proportionalControl = 0;
+	float derror;
+	float outputDControl;
+	
+	prevProportional = proportionalControl;
+	derror = setPoint - processVariable;
+	proportionalControl = derror * dKp;
+	
+	// Overflow Check 
+	if((prevDError > 0) && (derror > 0) && (prevProportional < 0)){
+		proportionalControl = prevProportional;
+	}
+  if((prevDError < 0) && (derror < 0) && (prevProportional > 0)){
+		proportionalControl = prevProportional;
+	}
+
+	// Output
+	// Output should be a ratio of the two PWMs
+	outputDControl = proportionalControl;
+
+	return outputDControl;
+	
+}
+
+void distancePIDcontrol(float distanceOut) {
+	
+	if (distanceOut < 0) {
+		distanceOut = distanceOut * (-1);
+		
+		dSpeed = floor(distanceOut);
+		
+		if(dSpeed < 0) dSpeed = 2;
+		else if (dSpeed > 3000) dSpeed = 3000;
+	
+		GPIO_PORTB_DATA_R = 0x05;
+		
+		// Update Speeds
+		M0PWM6_Duty(dSpeed);
+		M0PWM7_Duty(dSpeed);
+	}
+	
+	else {
+		distanceOut = distanceOut;
+		
+		dSpeed = floor(distanceOut);
+
+		if(dSpeed < 0) dSpeed = 2;
+		else if (dSpeed > 3000) dSpeed = 3000;
+	
+		GPIO_PORTB_DATA_R = 0x0A;
+		
+		// Update Speeds
+		M0PWM6_Duty(dSpeed);
+		M0PWM7_Duty(dSpeed);
+	}
+	
+	
+}
 

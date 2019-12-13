@@ -54,14 +54,14 @@ void resetArm(void){
 	Delay2();
 	M0PWM3_Duty(720); //PB5 - To Center
 	Delay2();
-	M0PWM0_Duty(400); // PB6
+	M1PWM3_Duty(400); // PB6
 	Delay2();
-	M0PWM1_Duty_new(1800); //PB7 - Reset Height
+	M1PWM2_Duty(1800); //PB7 - Reset Height
 }
 
 void dropArm(void){
 	Delay2();
-	M0PWM1_Duty_new(1700); //PB7 - Reset Height
+	M1PWM2_Duty(1700); //PB7 - Reset Height
 	Delay2();
 	Delay2();
 	M0PWM3_Duty(255); //PB5 - To Drop Off
@@ -77,24 +77,24 @@ void pickUp(int pickUpValue){
 	Delay2();
 	M0PWM2_Duty(320); //Open hand PA7
 	Delay2();
-	M0PWM0_Duty(400); //Reset Joint 2 PB6
+	M1PWM3_Duty(400); //Reset Joint 2 PB6
 	Delay2();
-	M0PWM1_Duty_new(1800); // Reset Joint 3 PB7
+	M1PWM2_Duty(1800); // Reset Joint 3 PB7
 	Delay2();
 	
 	
 	// START THE MOVEMENT
-	increasePWM(400, 850, M0PWM0_Duty); // PB6
+	increasePWM(400, 850, M1PWM3_Duty); // PB6
 	Delay2();
-	decreasePWM(1800, 1500, M0PWM1_Duty_new); // PB7
+	decreasePWM(1800, 1500, M1PWM2_Duty); // PB7
 	Delay2();
-	increasePWM(850, 1050, M0PWM0_Duty); // PB6
+	increasePWM(850, 1050, M1PWM3_Duty); // PB6
 	Delay2();
-	decreasePWM(1500, 1150, M0PWM1_Duty_new); // Joint 3 Stage 2 PB7
+	decreasePWM(1500, 1150, M1PWM2_Duty); // Joint 3 Stage 2 PB7
 	Delay2();
-	increasePWM(1050, 1250, M0PWM0_Duty); // PB6
+	increasePWM(1050, 1250, M1PWM3_Duty); // PB6
 	Delay2();
-	increasePWM(1250, 1500, M0PWM0_Duty); // PB6
+	increasePWM(1250, 1500, M1PWM3_Duty); // PB6
 	Delay2();
 	
 	// PICK UP THE BALL
@@ -103,11 +103,11 @@ void pickUp(int pickUpValue){
 	
 	// GET ARM READY FOR DROP OFF
 	Delay2();
-	decreasePWM(1500, 850, M0PWM0_Duty); // PB6
+	decreasePWM(1500, 850, M1PWM3_Duty); // PB6
 	Delay2();
-	increasePWM(1150, 1800, M0PWM1_Duty_new); // PB7
+	increasePWM(1150, 1800, M1PWM2_Duty); // PB7
 	Delay2();
-	decreasePWM(850, 400, M0PWM0_Duty); // PB6
+	decreasePWM(850, 400, M1PWM3_Duty); // PB6
 }
 
 float armPickUpLocation(int xCord) {
@@ -128,42 +128,46 @@ void armMovement(int pickUpCoord) {
 
 void dropOffMovement(void) {
 	int i;
+
+	// Set Direction to one forward, one backward
+	GPIO_PORTB_DATA_R = 0x09;
 	
-	M0PWM0_Duty(400);
-	M0PWM1_Duty_new(1800);
-	
-	GPIO_PORTB_DATA_R = 0x09; //One forward, one backward
+	// Motor Movement
+	M0PWM6_Duty(4800);
+	M0PWM7_Duty(4800);
 	
 	for(i = 0; i < 3; i++){
 		Delay2();
-		M0PWM6_Duty(8200);
-		M0PWM7_Duty(8200);
-		
-		M0PWM0_Duty(400);
-		M0PWM1_Duty_new(1800);
 	}
+	// Stop Motor
 	M0PWM6_Duty(3);
 	M0PWM7_Duty(3);
-
-	M0PWM0_Duty(400);
-	M0PWM1_Duty_new(1800);
 	
 	Delay2();
+	Delay2();
 	
-	for(i = 0; i < 2; i++){
+	// Set Direction to Backwards
+	GPIO_PORTB_DATA_R = 0x0A;
+	
+	// Motor Movement
+	M0PWM6_Duty(4000);
+	M0PWM7_Duty(4000);
+	
+	for(i = 0; i < 1; i++){
 		Delay2();
-		M0PWM6_Duty(6700);
-		M0PWM7_Duty(6700);
-		
-		M0PWM0_Duty(400);
-		M0PWM1_Duty_new(1800);
 	}
 	
+	// Stop Motor
+	M0PWM6_Duty(3);
+	M0PWM7_Duty(3);
+	
+	Delay2();
 	Delay2();
 	
 	// Gate Command
 	openGate();
 	
+	// Set Direction to Forward 
 	GPIO_PORTB_DATA_R = 0x05;
 }
 
@@ -173,79 +177,11 @@ void openGate(void) {
 	M0PWM4_Duty(630); // open the gate - connected to PA7
 	
 	// Delay ~10 seconds
-	for (j = 0; j < 5; j++) {
+	for (j = 0; j < 2; j++) {
 		Delay2();
 	}
 	
-	M0PWM4_Duty(200); // close the gate
-}
-
-/*
-int adjustRobot(int current, int final) {
-		int adjustFlag;
-		if (current > final) {
-			GPIO_PORTB_DATA_R = 0x0A;
-			M0PWM6_Duty(5000);
-			M0PWM7_Duty(5000);
-			adjustFlag = 1;
-		}
-		else if (current < final) {
-			GPIO_PORTB_DATA_R = 0x05;
-			M0PWM6_Duty(5000);
-			M0PWM7_Duty(5000);
-			adjustFlag = 1;
-  	}
-		else {
-			GPIO_PORTB_DATA_R = 0x0A;
-			M0PWM6_Duty(3);
-			M0PWM7_Duty(3);
-			adjustFlag = 0;
-			Delay3();
-		}
-		return adjustFlag;
+	M0PWM4_Duty(300); // close the gate (200 last)
 }
 
 
-void oldPickUp(void) {
-	Delay2();
-	M0PWM3_Duty(700); //Center PB5
-	Delay2();
-	M0PWM2_Duty(320); //Open hand PA7
-	Delay2();
-	M0PWM0_Duty(400); //Reset Joint 2 PB6
-	Delay2();
-	M0PWM1_Duty_new(1800); // Reset Joint 3 PB7
-	Delay2();
-	
-	// START
-	M0PWM0_Duty(850); // Joint 2 Stage 1 PB6
-	Delay2();
-	M0PWM1_Duty_new(1500); // Joint 3 Stage 1 PB7
-	Delay2();
-	M0PWM0_Duty(1050); // PB6
-	Delay2();
-	M0PWM1_Duty_new(1150); // Joint 3 Stage 2 PB7
-	Delay2();
-	Delay2();
-	M0PWM0_Duty(1250); // PB6
-	Delay2();
-	Delay2();
-	M0PWM0_Duty(1375); // PB6
-	Delay2();
-	Delay2();
-	M0PWM0_Duty(1450); // PB6
-	Delay2();
-	Delay2();
-	M0PWM0_Duty(1500); // Joint 2 Stage 2 PB6
-	Delay2();
-	Delay2();
-	Delay2();
-	M0PWM2_Init(15625, 550); //Grab  PA7
-	Delay2();
-	M0PWM0_Duty(850); // PB6
-	Delay2();
-	M0PWM1_Duty_new(1500); // PB7
-	Delay2();
-	M0PWM0_Duty(400); // PB6
-}
-*/

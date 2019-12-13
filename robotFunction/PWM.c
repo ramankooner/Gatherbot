@@ -285,3 +285,38 @@ void M1PWM3_Duty(uint16_t duty) {
 	PWM1_1_CMPB_R = duty - 1;
 }
 
+//********************************************
+//****************  PA6  *********************
+//***************  M1PWM3 ********************
+//********************************************
+
+void M1PWM2_Init(uint16_t period, uint16_t duty) {
+	volatile unsigned long delay;
+	SYSCTL_RCGCPWM_R |= 0x02;             // Activate PWM1
+	SYSCTL_RCGCGPIO_R |= 0x01;            // Activate port A
+	delay = SYSCTL_RCGCGPIO_R;
+	GPIO_PORTA_AFSEL_R |= 0x40;           // Alt funct on PA7
+	GPIO_PORTA_PCTL_R &= 0xF0FFFFFF;     // configure PA7 as M1PWM3
+	GPIO_PORTA_PCTL_R |= 0x05000000;
+	GPIO_PORTA_DIR_R |= 0x40;             // Set PA7 output
+	GPIO_PORTA_AMSEL_R &= ~0x40;          // disable analong funct on PA7
+	GPIO_PORTA_DEN_R |= 0x40;             // enable digital I/O on PA7
+	
+	SYSCTL_RCGCPWM_R |= 0x02;             // Active PWM1	
+	SYSCTL_RCGCGPIO_R |= 0x01;            // Clock for Port A
+	SYSCTL_RCC_R |= SYSCTL_RCC_USEPWMDIV; // 3) use PWM divider
+  SYSCTL_RCC_R &= ~SYSCTL_RCC_PWMDIV_M; //    clear PWM divider field
+  SYSCTL_RCC_R += SYSCTL_RCC_PWMDIV_64;  //    configure for /64 divider      
+	
+	PWM1_1_CTL_R = 0x00;                  // re-loading down
+	PWM1_1_GENA_R |= 0x000000C8;          // low on load
+	PWM1_1_LOAD_R = period - 1;              // cycles needed to count to 0
+	PWM1_1_CMPA_R = duty;                  // count value when output rises
+	PWM1_1_CTL_R |= 0x00000001;           // start PWM1
+	PWM1_ENABLE_R |= 0x04;                // enable M1PWM2
+}
+
+void M1PWM2_Duty(uint16_t duty) {
+	PWM1_1_CMPA_R = duty - 1;
+}
+
