@@ -10,6 +10,15 @@
 
 --------------------------------------------------------------------------------------------------------------------------------------------------
 
+/*
+PID Notes from Eric:
+
+Camera Feedback for Process Variable: 0 to 160.
+Desired Set Point: 80
+Process Variable is data read from UART
+
+*/
+
 // OLD PID LOOP FOR DISTANCE
 
 float controllerLoop(float setPoint, float processVariable) {

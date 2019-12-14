@@ -26,7 +26,6 @@
 #include "PWM.h"
 #include "portInitializations.h"
 #include "UART.h"
-//#include "Nokia5110.h"
 #include "uartCommunication.h"
 #include "PLL.h"
 #include "robotArmMovement.h"
@@ -35,8 +34,6 @@
 #include <math.h>
 
 // Motor PID Control
-// Consider: 24 0 15 / 24 0 0 / 12 0 0 / 21 0.009 0.00009
-// 90 .0009 45
 #define Kp 90
 #define Ki 0.0009
 #define Kd 45
@@ -55,40 +52,33 @@ float controllerLoop(float setPoint, float processVariable);
 void motorPIDcontrol(float motorPIDOutput);
 void distancePIDcontrol(float distanceOut);
 
-
+// For Loop Variables
 unsigned char n;
-int i,k,j,g;
-int buffer_count;
+int i, k, g;
 
 // ARM Variables
 float pickUpValue;
-int xValue;
-int pickUpFlag;
-float leftSpeed, rightSpeed, dSpeed;
 
 // UART Variables
 int uartFlag;
 char buffer[11];
-char distanceBuffer[10];
 int check_value, check_sum;
 int finalXCoordinateValue, finalYCoordinateValue;
 int dFinalX, dFinalDistance;
-int finalDistance;
-int dFinalDistance;
+int finalDistance, dFinalDistance;
 int checkDisplay;
-int command;
 
 // Motor Control
-int leftPWMSpeed;
-int rightPWMSpeed;
+int leftPWMSpeed, rightPWMSpeed;
 float motorSpeed, distanceSpeed;
+float dropSpeed, dSpeed;
 
 // Drop Off Control
-int dLeftPWMSpeed;
-int dRightPWMSpeed;
 float dMotorSpeed;
 int ballCount;
-int coord_count;
+
+// Data Sample Variables
+int coord_count, buffer_count;
 
 enum state {
 	SEARCH_BALL,
@@ -103,6 +93,7 @@ enum state {
 	SEARCH_DROPOFF,
 	APPROACH_DROPOFF,
 	DROPOFF_STOP,
+	ADJUST_DROPOFF,
 	BACKUP_DROPOFF,
 	FINAL_RESET
 } state;
@@ -114,24 +105,16 @@ int main(void){
 	PortF_Init(); //On-board LEDs
 	PortB_Init(); // Motor Direction Control and Arm Control
 	PortD_Init(); // Motor Movement Control
-	//Nokia5110_Init();
-	//Nokia5110_Clear();
-	GPIO_PORTF_DATA_R = 0x00;
-	
-	
+
 	// ARM MOVEMENT
 	// Initialize Arm
 	Delay2();
 	M0PWM3_Init(15625, 720);      // PB5 - To Center
 	Delay2();
-	M1PWM3_Init(15625, 400);
+	M1PWM3_Init(15625, 400);      // PA7 - Second Joint
 	Delay2();
-	M1PWM2_Init(15625, 1800);
+	M1PWM2_Init(15625, 1800);     // PA6 - Third Joint
 	Delay2();
-	//M0PWM0_Init(15625, 400);      // PB6 - Reset Height Joint 1 
-	//Delay2();
-	//M0PWM1_Init_new(15625, 1800); // PB7 - Reset Height	Joint 2
-	//Delay2();
 	M0PWM2_Init(15625, 320);      // PB4 - Open hand 
 	Delay2();
 	M0PWM4_Init(15625, 300);      // PE4 - Close The Gate - 630 = Open, 300 = Close
@@ -152,7 +135,6 @@ int main(void){
 	
 	// Flags and States
 	uartFlag = 1;
-	pickUpFlag = 0;
 	ballCount = 0;
 	buffer_count = 0;
 	coord_count = 0;
@@ -160,19 +142,14 @@ int main(void){
 	
 	// MCU Start Up Detection
 	Delay2();
-	Delay2();
-	
 	GPIO_PORTF_DATA_R = 0x0E;
-	
 	Delay2();
-	Delay2();
-	
+
 	while(1) {
 		
 		// UART COMMUNICATION
 		if (uartFlag == 1) {
-			//GPIO_PORTB_DATA_R = 0x05;
-			
+
 			n = UART_InChar();
 			
 			//PACKAGE: START | COMMAND | XCOORD1 | XCOORD0 | YCOORD1 | YCOORD0 | BALL DISTANCE | DROPOFF X1 | DROPOFF X0 | DROPOFF DISTANCE | CHECK SUM
@@ -187,10 +164,10 @@ int main(void){
 				// Check for corruption
 				check_value = buffer[0] + buffer[1] + buffer[2] + buffer[3] + buffer[4] + buffer[5] + buffer[6]+ buffer[7] + buffer[8] + buffer[9];
 				check_sum = check_value & 0x7F;
+			
 				if(check_sum == buffer[10]) {
 					// Display the check sum from PI as a decimal
 					checkDisplay = (int) buffer[10];
-					command = (int) buffer[1];
 					
 					// Convert the X and Y coordinates to Decimal numbers
 					finalXCoordinateValue = charToDecimal(buffer[2], buffer[3]);
@@ -238,15 +215,15 @@ int main(void){
 				
 					if (buffer[1] != 0x43) { // No ball found
 						for(g = 0; g < 1; g++) {
-							M0PWM6_Duty(3300);
+							M0PWM6_Duty(4000);
 							M0PWM7_Duty(2);
 							Delay();
 						}
 					}
 					else { //Ball found. Pause, then update state.
 						for (g = 0; g < 2; g++) {
-							M0PWM6_Duty(3);
-							M0PWM7_Duty(3);
+							M0PWM6_Duty(2);
+							M0PWM7_Duty(2);
 							Delay2();
 						}
 						state = APPROACH_BALL;
@@ -265,8 +242,8 @@ int main(void){
 					motorPIDcontrol(motorSpeed);
 				}
 				else {
-					M0PWM6_Duty(3);
-					M0PWM7_Duty(3);
+					M0PWM6_Duty(2);
+					M0PWM7_Duty(2);
 					state = STOP_CAR;
 				}
 				
@@ -275,8 +252,8 @@ int main(void){
 			case STOP_CAR:
 				GPIO_PORTF_DATA_R = 0x0A;
 			
-				M0PWM6_Duty(3);
-				M0PWM7_Duty(3);
+				M0PWM6_Duty(2);
+				M0PWM7_Duty(2);
 				for (g = 0; g < 2; g++) {
 					Delay2();
 				}
@@ -385,8 +362,8 @@ int main(void){
 				else {
 					GPIO_PORTB_DATA_R = 0x05;
 					for (g = 0; g < 2; g++) {
-						M0PWM6_Duty(3);
-						M0PWM7_Duty(3);
+						M0PWM6_Duty(2);
+						M0PWM7_Duty(2);
 						Delay2();
 					}
 					state = APPROACH_DROPOFF;
@@ -401,7 +378,7 @@ int main(void){
 				Delay2();
 				Delay2();
 	
-				if (dFinalDistance > 20) {
+				if (dFinalDistance > 80) {
 					GPIO_PORTB_DATA_R = 0x05;
 					dMotorSpeed = controlLoop(80, dFinalX);
 					motorPIDcontrol(dMotorSpeed);
@@ -413,27 +390,48 @@ int main(void){
 			case DROPOFF_STOP:
 				GPIO_PORTF_DATA_R = 0x0C;
 			
-				M0PWM6_Duty(3);
-				M0PWM7_Duty(3);
+				M0PWM6_Duty(2);
+				M0PWM7_Duty(2);
 				for (g = 0; g < 3; g++) {
 					Delay2();
 				}
-				state = BACKUP_DROPOFF;
+				
+				state = ADJUST_DROPOFF;
+				
+				break;
+			
+			case ADJUST_DROPOFF:
+					
+				GPIO_PORTF_DATA_R = 0x04;
+			
+				dropSpeed = controllerLoop(65, dFinalDistance);
+			
+				distancePIDcontrol(dropSpeed + 2);
+			
+				if (dFinalDistance >= 60 && dFinalDistance < 66) {
+					M0PWM6_Duty(2);
+					M0PWM7_Duty(2);
+					Delay2();
+					state = BACKUP_DROPOFF;
+				}
+			
 				break;
 			
 			case BACKUP_DROPOFF:
 				GPIO_PORTF_DATA_R = 0x0A;
 			
 				Delay2();
-				Delay2();
 			
-				dropOffMovement(); //180 back up
+				// 180 Degree Turn and Back up car
+				dropOffMovement();      
+			
+				// Set Motor Direction To Forward
 				GPIO_PORTB_DATA_R = 0x05;
-				ballCount = 0; //Reset ball count
-				state = FINAL_RESET; //Restart search
-				
-				Delay2();
-				Delay2();
+			
+				// Reset Ball Count
+				ballCount = 0; 
+			
+				state = FINAL_RESET; 
 			
 				break;	
 			
@@ -449,23 +447,15 @@ int main(void){
 				}
 				
 				break;
+				
 		}//End State Machine
 		
 	}	//End Superloop
 	
 } //End Main
 
-/*
-PID Notes from Eric:
 
-Camera Feedback for Process Variable: 0 to 160.
-Desired Set Point: 80
-Process Variable is data read from UART
-
-*/
-
-
-// PID CONTROL FOR CENTERING BALL
+// PID CONTROL 
 float controlLoop(float setPoint, float processVariable) {
 	
 	static float preError = 0;
@@ -546,7 +536,17 @@ float controllerLoop(float setPoint, float processVariable) {
   if((prevDError < 0) && (derror < 0) && (prevProportional > 0)){
 		proportionalControl = prevProportional;
 	}
-
+	
+	
+	// Check if Error == 1
+	//      Robot will not move on 2000 PWM so increase PWM
+	//            when the Error == 1
+	/*
+	if (proportionalControl == dKp) {
+		proportionalControl = 3500;
+	}
+	*/
+	
 	// Output
 	// Output should be a ratio of the two PWMs
 	outputDControl = proportionalControl;
