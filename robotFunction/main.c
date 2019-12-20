@@ -39,7 +39,7 @@
 #define Kd 45
 
 // Drop Off PID Control
-#define dKp 2000 //2000
+#define dKp 1300 //2000
 #define dKi 0
 #define dKd 0
 
@@ -215,7 +215,7 @@ int main(void){
 				
 					if (buffer[1] != 0x43) { // No ball found
 						for(g = 0; g < 1; g++) {
-							M0PWM6_Duty(4000);
+							M0PWM6_Duty(3500);
 							M0PWM7_Duty(2);
 							Delay();
 						}
@@ -288,7 +288,7 @@ int main(void){
 				
 			case CHECK_COORD:
 				
-				if(finalDistance != 17){ //Second check for distance.
+				if(finalDistance != 17 ){ //Second check for distance.
 					state = ADJUST_DISTANCE;
 					coord_count = 0;
 				}
@@ -335,14 +335,13 @@ int main(void){
 			
 			case CHECK_COUNT:
 				
-				if(ballCount >= 2) {
+				if(ballCount >= 10) {
 					state = SEARCH_DROPOFF;
 				}
 				else {
 					state = SEARCH_BALL;
 				}
 				break;
-				
 			
 			case SEARCH_DROPOFF:
 				
@@ -378,7 +377,7 @@ int main(void){
 				Delay2();
 				Delay2();
 	
-				if (dFinalDistance > 80) {
+				if (dFinalDistance > 65) {
 					GPIO_PORTB_DATA_R = 0x05;
 					dMotorSpeed = controlLoop(80, dFinalX);
 					motorPIDcontrol(dMotorSpeed);
@@ -404,11 +403,11 @@ int main(void){
 					
 				GPIO_PORTF_DATA_R = 0x04;
 			
-				dropSpeed = controllerLoop(65, dFinalDistance);
+				dropSpeed = controllerLoop(35, dFinalDistance);
 			
 				distancePIDcontrol(dropSpeed + 2);
 			
-				if (dFinalDistance >= 60 && dFinalDistance < 66) {
+				if (dFinalDistance >= 33 && dFinalDistance < 37) {
 					M0PWM6_Duty(2);
 					M0PWM7_Duty(2);
 					Delay2();
@@ -541,11 +540,9 @@ float controllerLoop(float setPoint, float processVariable) {
 	// Check if Error == 1
 	//      Robot will not move on 2000 PWM so increase PWM
 	//            when the Error == 1
-	/*
-	if (proportionalControl == dKp) {
-		proportionalControl = 3500;
+	if (derror == 1) {
+		proportionalControl = 2800;
 	}
-	*/
 	
 	// Output
 	// Output should be a ratio of the two PWMs

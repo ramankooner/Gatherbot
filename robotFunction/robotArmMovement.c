@@ -133,8 +133,8 @@ void dropOffMovement(void) {
 	GPIO_PORTB_DATA_R = 0x09;
 	
 	// Motor Movement
-	M0PWM6_Duty(4800);
-	M0PWM7_Duty(4800);
+	M0PWM6_Duty(5000);
+	M0PWM7_Duty(5000);
 	
 	for(i = 0; i < 3; i++){
 		Delay2();
@@ -150,10 +150,10 @@ void dropOffMovement(void) {
 	GPIO_PORTB_DATA_R = 0x0A;
 	
 	// Motor Movement
-	M0PWM6_Duty(4000);
-	M0PWM7_Duty(4000);
+	M0PWM6_Duty(3850);
+	M0PWM7_Duty(3850);
 	
-	for(i = 0; i < 1; i++){
+	for(i = 0; i < 2; i++){
 		Delay2();
 	}
 	
@@ -169,6 +169,13 @@ void dropOffMovement(void) {
 	
 	// Set Direction to Forward 
 	GPIO_PORTB_DATA_R = 0x05;
+	
+	M0PWM6_Duty(4000);
+	M0PWM7_Duty(4000);
+	
+	for(i = 0; i < 2; i++) {
+		Delay2();
+	}
 }
 
 void openGate(void) {
